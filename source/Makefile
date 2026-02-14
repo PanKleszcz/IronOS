@@ -314,8 +314,10 @@ DEV_GLOBAL_DEFS=-D N32L40X              \
 
 DEV_LDFLAGS=-Wl,--wrap=printf  -Wl,--no-wchar-size-warning
 DEV_AFLAGS=
-DEV_CFLAGS=-D VECT_TAB_OFFSET=$(bootldr_size)U
-DEV_CXXFLAGS=
+# remove for release
+swd_enable=1
+DEV_CFLAGS=-D VECT_TAB_OFFSET=$(bootldr_size)U -g
+DEV_CXXFLAGS=-g
 CPUFLAGS=-mcpu=cortex-m4  \
          -mthumb          \
          -mfloat-abi=softfp
@@ -361,28 +363,28 @@ S_SRCS:=$(shell find $(DEVICE_BSP_DIR) -type f -name '*.S')
 
 
 # Code optimisation ------------------------------------------------------------
-OPTIM=-Os                             \
-      -fno-jump-tables                \
-      -foptimize-strlen               \
-      -faggressive-loop-optimizations \
-      -fdevirtualize-at-ltrans        \
-      -fmerge-all-constants           \
-      -fshort-wchar                   \
-      -flto=auto                      \
-      -finline-small-functions        \
-      -finline-functions              \
-      -findirect-inlining             \
-      -fdiagnostics-color             \
+OPTIM=-Og                             \
       -ffunction-sections             \
-      -fdata-sections                 \
-      -fshort-enums                   \
-      -fsingle-precision-constant     \
-      -fno-common                     \
-      -fno-math-errno                 \
-      -ffast-math                     \
-      -ffinite-math-only              \
-      -fno-signed-zeros               \
-      -fsingle-precision-constant
+      -fdata-sections
+#       -fno-jump-tables                \
+#       -foptimize-strlen               \
+#       -faggressive-loop-optimizations \
+#       -fdevirtualize-at-ltrans        \
+#       -fmerge-all-constants           \
+#       -fshort-wchar                   \
+#       -flto=auto                      \
+#       -finline-small-functions        \
+#       -finline-functions              \
+#       -findirect-inlining             \
+#       -fdiagnostics-color             \
+#       -fshort-enums                   \
+#       -fsingle-precision-constant     \
+#       -fno-common                     \
+#       -fno-math-errno                 \
+#       -ffast-math                     \
+#       -ffinite-math-only              \
+#       -fno-signed-zeros               \
+#       -fsingle-precision-constant
 
 # Global defines ---------------------------------------------------------------
 GLOBAL_DEFINES+=$(DEV_GLOBAL_DEFS) -D USE_RTOS_SYSTICK -D MODEL_$(model) -D VECT_TAB_OFFSET=$(bootldr_size)U -fshort-wchar
@@ -481,7 +483,9 @@ CXXFLAGS=$(DEV_CXXFLAGS)        \
        -fno-use-cxa-atexit      \
        -fno-strict-aliasing     \
        -fno-threadsafe-statics  \
-       -T$(LDSCRIPT)
+       -T$(LDSCRIPT) \
+       -Og \
+       -g
 
 CFLAGS=$(DEV_CFLAGS)     \
        $(CPUFLAGS)       \
@@ -491,7 +495,7 @@ CFLAGS=$(DEV_CFLAGS)     \
      -D${COMPILER}       \
      -MMD                \
      -std=gnu11          \
-     -g3                 \
+     -g                 \
        $(OPTIM)          \
      -T$(LDSCRIPT)       \
      -c
