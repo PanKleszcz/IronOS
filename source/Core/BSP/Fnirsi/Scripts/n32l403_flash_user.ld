@@ -40,8 +40,8 @@ _Min_Stack_Size = 0x800; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-FLASH (rx)      : ORIGIN = 0x8005800, LENGTH = 106K
-RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 24K
+FLASH (rx)      : ORIGIN = 0x08005800, LENGTH = 104K /* This is actually 106K but let's reserve the last 2K for the original Fnirsi settings section */
+RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 24K
 }
 
 /* Define output sections */
@@ -167,8 +167,6 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(4);
   } >RAM
-
-
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
