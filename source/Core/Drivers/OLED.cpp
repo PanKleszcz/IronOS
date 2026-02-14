@@ -33,72 +33,117 @@ uint32_t OLED::displayChecksum;
  * All commands are prefixed with 0x80
  * Data packets are prefixed with 0x40
  */
-I2C_CLASS::I2C_REG OLED_Setup_Array[] = {
-    /**/
-    {0x80,         OLED_OFF, 0}, /* Display off */
-    {0x80,     OLED_DIVIDER, 0}, /* Set display clock divide ratio / osc freq */
-    {0x80,             0x52, 0}, /* Divide ratios */
-    {0x80,             0xA8, 0}, /* Set Multiplex Ratio */
-    {0x80,  OLED_HEIGHT - 1, 0}, /* Multiplex ratio adjusts how far down the matrix it scans */
-    {0x80,             0xC0, 0}, /* Set COM Scan direction */
-    {0x80,             0xD3, 0}, /* Set vertical Display offset */
-    {0x80,             0x00, 0}, /* 0 Offset */
-    {0x80,             0x40, 0}, /* Set Display start line to 0 */
-#ifdef OLED_SEGMENT_MAP_REVERSED
-    {0x80,             0xA1, 0}, /* Set Segment remap to normal */
-#else
-    {0x80, 0xA0, 0}, /* Set Segment remap to normal */
-#endif
-    {0x80,             0x8D, 0}, /* Charge Pump */
-    {0x80,             0x14, 0}, /* Charge Pump settings */
-    {0x80,             0xDA, 0}, /* Set VCOM Pins hardware config */
-    {0x80, OLED_VCOM_LAYOUT, 0}, /* Combination 0x2 or 0x12 depending on OLED model */
-    {0x80,             0x81, 0}, /* Brightness */
-    {0x80,             0x00, 0}, /* ^0 */
-    {0x80,             0xD9, 0}, /* Set pre-charge period */
-    {0x80,             0xF1, 0}, /* Pre charge period */
-    {0x80,             0xDB, 0}, /* Adjust VCOMH regulator ouput */
-    {0x80,             0x30, 0}, /* VCOM level */
-    {0x80,             0xA4, 0}, /* Enable the display GDDR */
-    {0x80,             0xA6, 0}, /* Normal display */
-    {0x80,             0x20, 0}, /* Memory Mode */
-    {0x80,             0x00, 0}, /* Wrap memory */
-    {0x80,          OLED_ON, 0}, /* Display on */
-};
+// I2C_CLASS::I2C_REG OLED_Setup_Array[] = {
+//     /**/
+//     {0x80,         OLED_OFF, 0}, /* Display off */
+//     {0x80,     OLED_DIVIDER, 0}, /* Set display clock divide ratio / osc freq */
+//     {0x80,             0x52, 0}, /* Divide ratios */
+//     {0x80,             0xA8, 0}, /* Set Multiplex Ratio */
+//     {0x80,  OLED_HEIGHT - 1, 0}, /* Multiplex ratio adjusts how far down the matrix it scans */
+//     {0x80,             0xC0, 0}, /* Set COM Scan direction */
+//     {0x80,             0xD3, 0}, /* Set vertical Display offset */
+//     {0x80,             0x00, 0}, /* 0 Offset */
+//     {0x80,             0x40, 0}, /* Set Display start line to 0 */
+// #ifdef OLED_SEGMENT_MAP_REVERSED
+//     {0x80,             0xA1, 0}, /* Set Segment remap to normal */
+// #else
+//     {0x80, 0xA0, 0}, /* Set Segment remap to normal */
+// #endif
+//     {0x80,             0x8D, 0}, /* Charge Pump */
+//     {0x80,             0x14, 0}, /* Charge Pump settings */
+//     {0x80,             0xDA, 0}, /* Set VCOM Pins hardware config */
+//     {0x80, OLED_VCOM_LAYOUT, 0}, /* Combination 0x2 or 0x12 depending on OLED model */
+//     {0x80,             0x81, 0}, /* Brightness */
+//     {0x80,             0x00, 0}, /* ^0 */
+//     {0x80,             0xD9, 0}, /* Set pre-charge period */
+//     {0x80,             0xF1, 0}, /* Pre charge period */
+//     {0x80,             0xDB, 0}, /* Adjust VCOMH regulator ouput */
+//     {0x80,             0x30, 0}, /* VCOM level */
+//     {0x80,             0xA4, 0}, /* Enable the display GDDR */
+//     {0x80,             0xA6, 0}, /* Normal display */
+//     {0x80,             0x20, 0}, /* Memory Mode */
+//     {0x80,             0x00, 0}, /* Wrap memory */
+//     {0x80,          OLED_ON, 0}, /* Display on */
+// };
 // Setup based on the SSD1307 and modified for the SSD1306
 
-const uint8_t REFRESH_COMMANDS[17] = {
-    // Set display ON:
-    0x80,
-    0xAF, // cmd
+// const uint8_t REFRESH_COMMANDS[17] = {
+//     // Set display ON:
+//     0x80,
+//     0xAF, // cmd
 
-    // Set column address:
-    //  A[6:0] - Column start address = 0x20
-    //  B[6:0] - Column end address = 0x7F
-    0x80,
-    0x21, // cmd
-    0x80,
-    OLED_GRAM_START, // A
-    0x80,
-    OLED_GRAM_END, // B
+//     // Set column address:
+//     //  A[6:0] - Column start address = 0x20
+//     //  B[6:0] - Column end address = 0x7F
+//     0x80,
+//     0x21, // cmd
+//     0x80,
+//     OLED_GRAM_START, // A
+//     0x80,
+//     OLED_GRAM_END, // B
 
-    // Set COM output scan direction (normal mode, COM0 to COM[N-1])
-    0x80,
-    0xC0,
+//     // Set COM output scan direction (normal mode, COM0 to COM[N-1])
+//     0x80,
+//     0xC0,
 
-    // Set page address:
-    //  A[2:0] - Page start address = 0
-    //  B[2:0] - Page end address = 1
-    0x80,
-    0x22, // cmd
-    0x80,
-    0x00, // A
-    0x80,
-    (OLED_HEIGHT / 8) - 1, // B
+//     // Set page address:
+//     //  A[2:0] - Page start address = 0
+//     //  B[2:0] - Page end address = 1
+//     0x80,
+//     0x22, // cmd
+//     0x80,
+//     0x00, // A
+//     0x80,
+//     (OLED_HEIGHT / 8) - 1, // B
 
-    // Start of data
-    0x40,
+//     // Start of data
+//     0x40,
+// };
+
+// TODO: create separate class for this
+
+
+const FRToSSPI::SPI_CMD lcdInitCmds[] = {
+  {ST7735_SWRESET, FRToSSPI::SPI_CMD_DELAY_MS, 150, NULL},
+  {ST7735_SLPOUT, FRToSSPI::SPI_CMD_DELAY_MS, 200, NULL},
+
+  {ST7735_FRMCTR1, FRToSSPI::SPI_CMD_PAYLOAD, 3, (uint8_t[]){0x05, 0x3A, 0x3A}},
+  {ST7735_FRMCTR2, FRToSSPI::SPI_CMD_PAYLOAD, 3, (uint8_t[]){0x05, 0x3A, 0x3A}},
+  {ST7735_FRMCTR3, FRToSSPI::SPI_CMD_PAYLOAD, 6, (uint8_t[]){0x05, 0x3A, 0x3A, 0x05, 0x3A, 0x3A}},
+
+  {ST7735_PWCTR1, FRToSSPI::SPI_CMD_PAYLOAD, 3, (uint8_t[]){0x62, 0x02, 0x04}},
+  {ST7735_PWCTR2, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0xC0}},
+  {ST7735_PWCTR3, FRToSSPI::SPI_CMD_PAYLOAD, 2, (uint8_t[]){0x0D, 0x00}},
+  {ST7735_PWCTR4, FRToSSPI::SPI_CMD_PAYLOAD, 2, (uint8_t[]){0x8D, 0x6A}},
+  {ST7735_PWCTR5, FRToSSPI::SPI_CMD_PAYLOAD, 2, (uint8_t[]){0x8D, 0xEE}},
+
+  {ST7735_GMCTRP1, FRToSSPI::SPI_CMD_PAYLOAD, 16, (uint8_t[]){0x10, 0x0E, 0x02, 0x03, 0x0E, 0x07, 0x02, 0x07, 0x0A, 0x12, 0x27, 0x37, 0x00, 0x0D, 0x0E, 0x10}},
+  {ST7735_GMCTRN1, FRToSSPI::SPI_CMD_PAYLOAD, 16, (uint8_t[]){0x10, 0x0E, 0x03, 0x03, 0x0F, 0x06, 0x02, 0x08, 0x0A, 0x13, 0x26, 0x36, 0x00, 0x0D, 0x0E, 0x10}},
+
+  {ST7735_INVCTR, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0x03}},
+  {ST7735_INVON, FRToSSPI::SPI_CMD_PAYLOAD, 0, NULL},
+  {ST7735_VMCTR1, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0x0E}},
+  {ST7735_MADCTL, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0x88}},
+  {ST7735_COLMOD, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0x05}},
+
+  {ST7735_NORON, FRToSSPI::SPI_CMD_DELAY_MS, 10, NULL},
+  {ST7735_DISPON, FRToSSPI::SPI_CMD_DELAY_MS, 100, NULL},
 };
+
+FRToSSPI::SPI_CMD lcdSetAreaCmds[] = {
+  {ST7735_RASET, FRToSSPI::SPI_CMD_PAYLOAD, 4, (uint8_t[]){0, 16 + ST7735_XOFFSET, 0, 16 + OLED_WIDTH + ST7735_XOFFSET - 1}},
+  {ST7735_CASET, FRToSSPI::SPI_CMD_PAYLOAD, 4, (uint8_t[]){0, 24 + ST7735_YOFFSET, 0, 24 + OLED_HEIGHT + ST7735_YOFFSET - 1}},
+  {ST7735_RAMWR, FRToSSPI::SPI_CMD_PAYLOAD, 0, NULL},
+};
+
+void OLED::setDrawingWindow(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
+  lcdSetAreaCmds[0].data[1] = x + ST7735_XOFFSET;
+  lcdSetAreaCmds[0].data[3] = x + w + ST7735_XOFFSET - 1;
+  lcdSetAreaCmds[1].data[1] = y + ST7735_YOFFSET;
+  lcdSetAreaCmds[1].data[3] = y + h + ST7735_YOFFSET - 1;
+
+  SPI_CLASS::sendCmdChain(lcdSetAreaCmds, sizeof(lcdSetAreaCmds)/sizeof(*lcdSetAreaCmds));
+}
 
 /*
  * Animation timing function that follows a bezier curve.
@@ -132,17 +177,32 @@ void OLED::initialize() {
 
 #endif /* OLED_128x32 */
   displayOffset = 0;
-  memcpy(&screenBuffer[0], &REFRESH_COMMANDS[0], sizeof(REFRESH_COMMANDS));
-  memcpy(&secondFrameBuffer[0], &REFRESH_COMMANDS[0], sizeof(REFRESH_COMMANDS));
+  // memcpy(&screenBuffer[0], &REFRESH_COMMANDS[0], sizeof(REFRESH_COMMANDS));
+  // memcpy(&secondFrameBuffer[0], &REFRESH_COMMANDS[0], sizeof(REFRESH_COMMANDS));
 
   // Set the display to be ON once the settings block is sent and send the
   // initialisation data to the OLED.
 
-  for (int tries = 0; tries < 10; tries++) {
-    if (I2C_CLASS::writeRegistersBulk(DEVICEADDR_OLED, OLED_Setup_Array, sizeof(OLED_Setup_Array) / sizeof(OLED_Setup_Array[0]))) {
-      tries = 11;
-    }
-  }
+  // TODO: create a separate SPI driver
+
+  SPI_CLASS::init();
+  SPI_CLASS::sendCmdChain(lcdInitCmds, sizeof(lcdInitCmds)/sizeof(*lcdInitCmds));
+
+  // Erase background
+  setDrawingWindow(0, 0, 160, 80);
+  SPI_CLASS::sendByteMutiple(0x00, 2*160*80);
+
+  // Draw a nice frame for the emulated OLED display
+  setDrawingWindow(12, 20, 136, 40);
+  SPI_CLASS::sendByteMutiple(0xFF, 2*136*40);
+  setDrawingWindow(14, 22, 132, 36);
+  SPI_CLASS::sendByteMutiple(0x00, 2*132*36);
+
+  // for (int tries = 0; tries < 10; tries++) {
+  //   if (I2C_CLASS::writeRegistersBulk(DEVICEADDR_OLED, OLED_Setup_Array, sizeof(OLED_Setup_Array) / sizeof(OLED_Setup_Array[0]))) {
+  //     tries = 11;
+  //   }
+  // }
   setDisplayState(DisplayState::ON);
   initDone = true;
 }
@@ -231,33 +291,33 @@ void OLED::drawScrollIndicator(uint8_t y, uint8_t height) {
  * on the screen. This operates directly on the OLED graphics RAM, as this
  * is intended to be used before calling `OLED::transitionScrollDown()`.
  */
-void OLED::maskScrollIndicatorOnOLED() {
-  // The right-most column depends on the screen rotation, so just take
-  // it from the screen buffer which is updated by `OLED::setRotation`.
-  uint8_t rightmostColumn = screenBuffer[7];
-  uint8_t maskCommands[]  = {
-      // Set column address:
-      //  A[6:0] - Column start address = rightmost column
-      //  B[6:0] - Column end address = rightmost column
-      0x80,
-      0x21, // cmd
-      0x80,
-      rightmostColumn, // A
-      0x80,
-      rightmostColumn, // B
+// void OLED::maskScrollIndicatorOnOLED() {
+//   // The right-most column depends on the screen rotation, so just take
+//   // it from the screen buffer which is updated by `OLED::setRotation`.
+//   uint8_t rightmostColumn = screenBuffer[7];
+//   uint8_t maskCommands[]  = {
+//       // Set column address:
+//       //  A[6:0] - Column start address = rightmost column
+//       //  B[6:0] - Column end address = rightmost column
+//       0x80,
+//       0x21, // cmd
+//       0x80,
+//       rightmostColumn, // A
+//       0x80,
+//       rightmostColumn, // B
 
-      // Start of data
-      0x40,
-#ifdef OLED_128x32
-      0x00,
-      0x00,
-#endif /* OLED_128x32 */
-      // Clears two 8px strips
-      0x00,
-      0x00,
-  };
-  I2C_CLASS::Transmit(DEVICEADDR_OLED, maskCommands, sizeof(maskCommands));
-}
+//       // Start of data
+//       0x40,
+// #ifdef OLED_128x32
+//       0x00,
+//       0x00,
+// #endif /* OLED_128x32 */
+//       // Clears two 8px strips
+//       0x00,
+//       0x00,
+//   };
+//   I2C_CLASS::Transmit(DEVICEADDR_OLED, maskCommands, sizeof(maskCommands));
+// }
 
 /**
  * Plays a transition animation between two framebuffers.
@@ -477,59 +537,59 @@ void OLED::transitionScrollUp(const TickType_t viewEnterTime) {
 }
 
 void OLED::setRotation(bool leftHanded) {
-#ifdef OLED_FLIP
-  leftHanded = !leftHanded;
-#endif /* OLED_FLIP */
-  if (inLeftHandedMode == leftHanded) {
-    return;
-  }
-#ifdef OLED_SEGMENT_MAP_REVERSED
-  if (!leftHanded) {
-    OLED_Setup_Array[9].val = 0xA1;
-  } else {
-    OLED_Setup_Array[9].val = 0xA0;
-  }
-#else
-  if (leftHanded) {
-    OLED_Setup_Array[9].val = 0xA1;
-  } else {
-    OLED_Setup_Array[9].val = 0xA0;
-  }
-#endif /* OLED_SEGMENT_MAP_REVERSED */
-  // send command struct again with changes
-  if (leftHanded) {
-    OLED_Setup_Array[5].val = 0xC8; // c1?
-  } else {
-    OLED_Setup_Array[5].val = 0xC0;
-  }
-  I2C_CLASS::writeRegistersBulk(DEVICEADDR_OLED, OLED_Setup_Array, sizeof(OLED_Setup_Array) / sizeof(OLED_Setup_Array[0]));
-  osDelay(TICKS_10MS);
-  inLeftHandedMode = leftHanded;
+// #ifdef OLED_FLIP
+//   leftHanded = !leftHanded;
+// #endif /* OLED_FLIP */
+//   if (inLeftHandedMode == leftHanded) {
+//     return;
+//   }
+// #ifdef OLED_SEGMENT_MAP_REVERSED
+//   if (!leftHanded) {
+//     OLED_Setup_Array[9].val = 0xA1;
+//   } else {
+//     OLED_Setup_Array[9].val = 0xA0;
+//   }
+// #else
+//   if (leftHanded) {
+//     OLED_Setup_Array[9].val = 0xA1;
+//   } else {
+//     OLED_Setup_Array[9].val = 0xA0;
+//   }
+// #endif /* OLED_SEGMENT_MAP_REVERSED */
+//   // send command struct again with changes
+//   if (leftHanded) {
+//     OLED_Setup_Array[5].val = 0xC8; // c1?
+//   } else {
+//     OLED_Setup_Array[5].val = 0xC0;
+//   }
+//   // I2C_CLASS::writeRegistersBulk(DEVICEADDR_OLED, OLED_Setup_Array, sizeof(OLED_Setup_Array) / sizeof(OLED_Setup_Array[0]));
+//   osDelay(TICKS_10MS);
+//   inLeftHandedMode = leftHanded;
 
-  screenBuffer[5] = inLeftHandedMode ? OLED_GRAM_START_FLIP : OLED_GRAM_START; // display is shifted by 32 in left handed
-                                                                               // mode as driver ram is 128 wide
-  screenBuffer[7] = inLeftHandedMode ? OLED_GRAM_END_FLIP : OLED_GRAM_END;     // End address of the ram segment we are writing to (96 wide)
-  screenBuffer[9] = inLeftHandedMode ? 0xC8 : 0xC0;
-  // Force a screen refresh
-  const int len = FRAMEBUFFER_START + (OLED_WIDTH * (OLED_HEIGHT / 8));
-  I2C_CLASS::Transmit(DEVICEADDR_OLED, screenBuffer, len);
-  osDelay(TICKS_10MS);
-  checkDisplayBufferChecksum();
+//   screenBuffer[5] = inLeftHandedMode ? OLED_GRAM_START_FLIP : OLED_GRAM_START; // display is shifted by 32 in left handed
+//                                                                                // mode as driver ram is 128 wide
+//   screenBuffer[7] = inLeftHandedMode ? OLED_GRAM_END_FLIP : OLED_GRAM_END;     // End address of the ram segment we are writing to (96 wide)
+//   screenBuffer[9] = inLeftHandedMode ? 0xC8 : 0xC0;
+//   // Force a screen refresh
+//   const int len = FRAMEBUFFER_START + (OLED_WIDTH * (OLED_HEIGHT / 8));
+//   // I2C_CLASS::Transmit(DEVICEADDR_OLED, screenBuffer, len);
+//   osDelay(TICKS_10MS);
+//   checkDisplayBufferChecksum();
 }
 
 void OLED::setBrightness(uint8_t contrast) {
-  if (OLED_Setup_Array[15].val != contrast) {
-    OLED_Setup_Array[15].val = contrast;
-    I2C_CLASS::writeRegistersBulk(DEVICEADDR_OLED, &OLED_Setup_Array[14], 2);
-  }
+  // if (OLED_Setup_Array[15].val != contrast) {
+  //   OLED_Setup_Array[15].val = contrast;
+    // I2C_CLASS::writeRegistersBulk(DEVICEADDR_OLED, &OLED_Setup_Array[14], 2);
+  // }
 }
 
 void OLED::setInverseDisplay(bool inverse) {
-  uint8_t normalInverseCmd = inverse ? 0xA7 : 0xA6;
-  if (OLED_Setup_Array[21].val != normalInverseCmd) {
-    OLED_Setup_Array[21].val = normalInverseCmd;
-    I2C_CLASS::I2C_RegisterWrite(DEVICEADDR_OLED, 0x80, normalInverseCmd);
-  }
+  // uint8_t normalInverseCmd = inverse ? 0xA7 : 0xA6;
+  // if (OLED_Setup_Array[21].val != normalInverseCmd) {
+  //   OLED_Setup_Array[21].val = normalInverseCmd;
+    // I2C_CLASS::I2C_RegisterWrite(DEVICEADDR_OLED, 0x80, normalInverseCmd);
+  // }
 }
 
 // print a string to the current cursor location, len chars MAX

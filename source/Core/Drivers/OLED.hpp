@@ -31,14 +31,21 @@ extern "C" {
 #include "I2CBB1.hpp"
 #define I2C_CLASS I2CBB1
 #else
+#ifdef LCD_160x80
+#define SPI_CLASS FRToSSPI
+#include "SPI_Wrapper.hpp"
+#else
+#error REMOVE ME
 #define I2C_CLASS FRToSI2C
 #include "I2C_Wrapper.hpp"
+#endif
 #endif
 
 #define DEVICEADDR_OLED (0x3c << 1)
 
 #ifdef OLED_128x32
-
+#define OLED_WIDTH           128
+#define OLED_HEIGHT          32
 #define OLED_WIDTH           128
 #define OLED_HEIGHT          32
 #define OLED_GRAM_START      0x00 // Should be 0x00 when we have full width
@@ -68,13 +75,50 @@ extern "C" {
 #define OLED_ON  0xAF
 #define OLED_OFF 0xAE
 
-#define FRAMEBUFFER_START 17
+#define FRAMEBUFFER_START 0
+
+// ST7735 Commands
+#define ST7735_NOP     0x00
+#define ST7735_SWRESET 0x01
+#define ST7735_SLPOUT  0x11
+#define ST7735_NORON   0x13
+#define ST7735_INVOFF  0x20
+#define ST7735_INVON   0x21
+#define ST7735_DISPOFF 0x28
+#define ST7735_DISPON  0x29
+#define ST7735_CASET   0x2A
+#define ST7735_RASET   0x2B
+#define ST7735_RAMWR   0x2C
+#define ST7735_MADCTL  0x36
+#define ST7735_COLMOD  0x3A
+#define ST7735_FRMCTR1 0xB1
+#define ST7735_FRMCTR2 0xB2
+#define ST7735_FRMCTR3 0xB3
+#define ST7735_INVCTR  0xB4
+#define ST7735_PWCTR1  0xC0
+#define ST7735_PWCTR2  0xC1
+#define ST7735_PWCTR3  0xC2
+#define ST7735_PWCTR4  0xC3
+#define ST7735_PWCTR5  0xC4
+#define ST7735_VMCTR1  0xC5
+#define ST7735_GMCTRP1 0xE0
+#define ST7735_GMCTRN1 0xE1
+
+#define ST7735_XOFFSET 1
+#define ST7735_YOFFSET 26
 
 enum class FontStyle {
   SMALL,
   LARGE,
   EXTRAS,
 };
+
+// const FRToSSPI::SPI_CMD lcdSetAreaCmds[] = {
+//   {ST7735_CASET, FRToSSPI::SPI_CMD_PAYLOAD, 4, (uint8_t[]){0, ST7735_XOFFSET, 0, OLED_WIDTH + ST7735_XOFFSET - 1}},
+//   {ST7735_RASET, FRToSSPI::SPI_CMD_PAYLOAD, 4, (uint8_t[]){0, ST7735_YOFFSET, 0, OLED_HEIGHT + ST7735_YOFFSET - 1}},
+//   {ST7735_RAMWR, FRToSSPI::SPI_CMD_PAYLOAD, 0, NULL},
+// };
+
 
 class OLED {
 public:
@@ -87,9 +131,25 @@ public:
 
     if (checkDisplayBufferChecksum()) {
       const int len = FRAMEBUFFER_START + (OLED_WIDTH * (OLED_HEIGHT / 8));
-      I2C_CLASS::Transmit(DEVICEADDR_OLED, screenBuffer, len);
+      // I2C_CLASS::Transmit(DEVICEADDR_OLED, screenBuffer, len);
+
+      // SPI_CLASS::sendCmdChain(lcdSetAreaCmds, sizeof(lcdSetAreaCmds)/sizeof(*lcdSetAreaCmds));
+      // SPI_CLASS::sendPixels(screenBuffer, len);
+
       // DMA tx time is ~ 20mS Ensure after calling this you delay for at least 25ms
       // or we need to goto double buffering
+
+      // setDrawingWindow(16, 24, OLED_WIDTH, OLED_HEIGHT);
+      // SPI_CLASS::sendPixels(screenBuffer, len);
+      setDrawingWindow(16, 24, OLED_WIDTH, 8);
+      SPI_CLASS::sendPixels(stripPointers[0], len/4);
+      setDrawingWindow(16, 32, OLED_WIDTH, 8);
+      SPI_CLASS::sendPixels(stripPointers[1], len/4);
+      setDrawingWindow(16, 40, OLED_WIDTH, 8);
+      SPI_CLASS::sendPixels(stripPointers[2], len/4);
+      setDrawingWindow(16, 48, OLED_WIDTH, 8);
+      SPI_CLASS::sendPixels(stripPointers[3], len/4);
+
     }
   }
 
@@ -98,7 +158,7 @@ public:
       displayState    = state;
       screenBuffer[1] = (state == ON) ? OLED_ON : OLED_OFF;
       // Dump the screen state change out _now_
-      I2C_CLASS::Transmit(DEVICEADDR_OLED, screenBuffer, FRAMEBUFFER_START - 1);
+      // I2C_CLASS::Transmit(DEVICEADDR_OLED, screenBuffer, FRAMEBUFFER_START - 1);
       osDelay(TICKS_10MS);
     }
   }
@@ -166,6 +226,7 @@ private:
   }
   static void         drawChar(uint16_t charCode, FontStyle fontStyle, const uint8_t soft_x_limit); // Draw a character to the current cursor location
   static void         setFramebuffer(uint8_t *buffer);
+  static void         setDrawingWindow(uint8_t x, uint8_t y, uint8_t w, uint8_t h);
   static uint8_t     *stripPointers[4]; // Pointers to the strips to allow for buffer having extra content
   static bool         inLeftHandedMode; // Whether the screen is in left or not (used for offsets in GRAM)
   static bool         initDone;
