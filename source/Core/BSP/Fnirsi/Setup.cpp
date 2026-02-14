@@ -102,7 +102,7 @@ static void spiInit(void) {
     SPI_InitStructure.CLKPHA = SPI_CLKPHA_SECOND_EDGE;
     SPI_InitStructure.NSS = SPI_NSS_SOFT;
 
-    SPI_InitStructure.BaudRatePres = SPI_BR_PRESCALER_2; // 16MHz
+    SPI_InitStructure.BaudRatePres = SPI_BR_PRESCALER_4; // 16MHz
 
     SPI_InitStructure.FirstBit = SPI_FB_MSB;
     SPI_Init(SPI1, &SPI_InitStructure);
