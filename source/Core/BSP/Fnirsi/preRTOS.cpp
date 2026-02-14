@@ -2,7 +2,7 @@
  * preRTOS.c
  *
  *  Created on: 29 May 2020
- *      Author: Ralim
+ *      Author: Ralim, MrTick
  */
 
 #include "BSP.h"
@@ -22,7 +22,7 @@ void preRToSInit() {
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick.
    */
-  // hwInit();
+  hwInit();
 //   HAL_Init();
 //   Setup_HAL(); // Setup all the HAL objects
   BSPInit();
