@@ -365,26 +365,26 @@ S_SRCS:=$(shell find $(DEVICE_BSP_DIR) -type f -name '*.S')
 # Code optimisation ------------------------------------------------------------
 OPTIM=-Og                             \
       -ffunction-sections             \
-      -fdata-sections
-#       -fno-jump-tables                \
-#       -foptimize-strlen               \
-#       -faggressive-loop-optimizations \
-#       -fdevirtualize-at-ltrans        \
-#       -fmerge-all-constants           \
-#       -fshort-wchar                   \
-#       -flto=auto                      \
-#       -finline-small-functions        \
-#       -finline-functions              \
-#       -findirect-inlining             \
-#       -fdiagnostics-color             \
-#       -fshort-enums                   \
-#       -fsingle-precision-constant     \
-#       -fno-common                     \
-#       -fno-math-errno                 \
-#       -ffast-math                     \
-#       -ffinite-math-only              \
-#       -fno-signed-zeros               \
-#       -fsingle-precision-constant
+      -fdata-sections                 \
+      -fno-jump-tables                \
+      -foptimize-strlen               \
+      -faggressive-loop-optimizations \
+      -fdevirtualize-at-ltrans        \
+      -fmerge-all-constants           \
+      -fshort-wchar                   \
+      -flto=auto                      \
+      -finline-small-functions        \
+      -finline-functions              \
+      -findirect-inlining             \
+      -fdiagnostics-color             \
+      -fshort-enums                   \
+      -fsingle-precision-constant     \
+      -fno-common                     \
+      -fno-math-errno                 \
+      -ffast-math                     \
+      -ffinite-math-only              \
+      -fno-signed-zeros               \
+      -fsingle-precision-constant
 
 # Global defines ---------------------------------------------------------------
 GLOBAL_DEFINES+=$(DEV_GLOBAL_DEFS) -D USE_RTOS_SYSTICK -D MODEL_$(model) -D VECT_TAB_OFFSET=$(bootldr_size)U -fshort-wchar
