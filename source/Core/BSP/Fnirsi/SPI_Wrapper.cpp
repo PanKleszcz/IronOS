@@ -132,6 +132,7 @@ void FRToSSPI::init() {
     RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_SPI1, ENABLE);  // APB2 runs at 32MHz
 
     GPIO_InitStructure.Pin = LCD_SCK_Pin | LCD_MOSI_Pin;
+    GPIO_InitStructure.GPIO_Current = GPIO_DC_8mA;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Alternate = GPIO_AF0_SPI1;
     GPIO_InitPeripheral(LCD_Port, &GPIO_InitStructure);
