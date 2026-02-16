@@ -143,29 +143,34 @@
 #define MIN_BOOST_TEMP_C       250 // The min settable temp for boost mode °C
 #define MIN_BOOST_TEMP_F       480 // The min settable temp for boost mode °F
 
-#define FILTER_DISPLAYED_TIP_TEMP   16
+#define FILTER_DISPLAYED_TIP_TEMP   8
 
 
 #define VOLTAGE_DIV        540 // 540 - Default divider from schematic
 #define CALIBRATION_OFFSET 900 // 900 - Default adc offset in uV
-#define PID_POWER_LIMIT    70  // Sets the max pwm power limit
+#define PID_POWER_LIMIT    70  // Sets the max pwm power limit (NOT USED)
 #define POWER_LIMIT        0   // 0 watts default limit
 #define MAX_POWER_LIMIT    70
 #define POWER_LIMIT_STEPS  5
 #define OP_AMP_GAIN_STAGE  49
 #define USB_PD_VMAX              20 // Maximum voltage for PD to negotiate
 
-#define HARDWARE_MAX_WATTAGE_X10 700
+#define HARDWARE_MAX_WATTAGE_X10 700    // (NOT USED)
 
 // Values copied from Sequre S60 config:
-#define TIP_THERMAL_MASS        30 // X10 watts to raise 1 deg C in 1 second
-#define TIP_THERMAL_INERTIA    256 //
-#define TIP_RESISTANCE          25 // C245 is around 2R5
+#define TIP_THERMAL_MASS        25 // X10 watts to raise 1 deg C in 1 second
+#define TIP_THERMAL_INERTIA    512 //
+#define TIP_RESISTANCE          20 // C245 is around 2R5
 // #define I2C_SOFT_BUS_1 0
 // #define OLED_I2CBB1    0
 // #define ACCEL_I2CBB1   0
 // #define TIPTYPE_T12    0 // Can manually pick a T12 tip
 
+// Let's use PID because why not.
+// #define TIP_CONTROL_PID               // We use PID rather than integrator
+// #define TIP_PID_KP                40  // Reasonable compromise for most tips so far
+// #define TIP_PID_KI                6   // About as high for stability across tips
+// #define TIP_PID_KD                200 // Helps dampen smaller tips; ~= nothing for larger tips
 
 
 
