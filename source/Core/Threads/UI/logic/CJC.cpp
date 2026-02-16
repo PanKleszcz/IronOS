@@ -6,8 +6,8 @@ OperatingMode performCJCC(const ButtonState buttons, guiContext *cxt) {
 
   // While we wait for the pre-start checks to finish, we cant run CJC (as the pre-start checks control the tip)
   if (preStartChecks() == 0) {
-    OLED::setCursor(0, 0);
-    OLED::print(translatedString(Tr->CJCCalibrating), FontStyle::SMALL);
+    Display::setCursor(0, 0);
+    Display::print(translatedString(Tr->CJCCalibrating), FontStyle::SMALL);
     return OperatingMode::CJCCalibration;
   }
 

@@ -59,10 +59,10 @@ OperatingMode drawHomeScreen(const ButtonState buttons, guiContext *cxt) {
   uint32_t tipTemp = TipThermoModel::getTipInC();
 
   // Setup LCD Cursor location
-  if (OLED::getRotation()) {
-    OLED::setCursor(50, 0);
+  if (Display::getRotation()) {
+    Display::setCursor(50, 0);
   } else {
-    OLED::setCursor(-1, 0);
+    Display::setCursor(-1, 0);
   }
   if (getSettingValue(SettingsOptions::DetailedIDLE)) {
     ui_draw_homescreen_detailed(tipTemp);

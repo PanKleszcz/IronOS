@@ -10,8 +10,8 @@
 /**
  * Draw and update the scroll message if needed.
  *
- * This function does not call `OLED::refresh()`. If this function
- * returns `true`, the caller shall call `OLED::refresh()` to draw the
+ * This function does not call `Display::refresh()`. If this function
+ * returns `true`, the caller shall call `Display::refresh()` to draw the
  * modified framebuffer to the OLED screen.
  *
  * @param message The null-terminated message string. This must be the

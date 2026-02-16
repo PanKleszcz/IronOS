@@ -172,7 +172,7 @@ void startMOVTask(void const *argument __unused) {
     readAccelerometer(tx, ty, tz, rotation);
     if (getSettingValue(SettingsOptions::OrientationMode) == 2) {
       if (rotation != ORIENTATION_FLAT) {
-        OLED::setRotation(rotation == ORIENTATION_LEFT_HAND); // link the data through
+        Display::setRotation(rotation == ORIENTATION_LEFT_HAND); // link the data through
       }
     }
     datax[currentPointer] = (int32_t)tx;

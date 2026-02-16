@@ -3,21 +3,21 @@
 
 void ui_draw_temperature_change(void) {
 
-  OLED::setCursor(0, 0);
-  if (OLED::getRotation()) {
-    OLED::print(getSettingValue(SettingsOptions::ReverseButtonTempChangeEnabled) ? LargeSymbolPlus : LargeSymbolMinus, FontStyle::LARGE);
+  Display::setCursor(0, 0);
+  if (Display::getRotation()) {
+    Display::print(getSettingValue(SettingsOptions::ReverseButtonTempChangeEnabled) ? LargeSymbolPlus : LargeSymbolMinus, FontStyle::LARGE);
   } else {
-    OLED::print(getSettingValue(SettingsOptions::ReverseButtonTempChangeEnabled) ? LargeSymbolMinus : LargeSymbolPlus, FontStyle::LARGE);
+    Display::print(getSettingValue(SettingsOptions::ReverseButtonTempChangeEnabled) ? LargeSymbolMinus : LargeSymbolPlus, FontStyle::LARGE);
   }
 
-  OLED::print(LargeSymbolSpace, FontStyle::LARGE);
-  OLED::printNumber(getSettingValue(SettingsOptions::SolderingTemp), 3, FontStyle::LARGE);
-  OLED::printSymbolDeg(FontStyle::EXTRAS);
-  OLED::print(LargeSymbolSpace, FontStyle::LARGE);
-  if (OLED::getRotation()) {
-    OLED::print(getSettingValue(SettingsOptions::ReverseButtonTempChangeEnabled) ? LargeSymbolMinus : LargeSymbolPlus, FontStyle::LARGE);
+  Display::print(LargeSymbolSpace, FontStyle::LARGE);
+  Display::printNumber(getSettingValue(SettingsOptions::SolderingTemp), 3, FontStyle::LARGE);
+  Display::printSymbolDeg(FontStyle::EXTRAS);
+  Display::print(LargeSymbolSpace, FontStyle::LARGE);
+  if (Display::getRotation()) {
+    Display::print(getSettingValue(SettingsOptions::ReverseButtonTempChangeEnabled) ? LargeSymbolMinus : LargeSymbolPlus, FontStyle::LARGE);
   } else {
-    OLED::print(getSettingValue(SettingsOptions::ReverseButtonTempChangeEnabled) ? LargeSymbolPlus : LargeSymbolMinus, FontStyle::LARGE);
+    Display::print(getSettingValue(SettingsOptions::ReverseButtonTempChangeEnabled) ? LargeSymbolPlus : LargeSymbolMinus, FontStyle::LARGE);
   }
 }
 #endif

@@ -88,8 +88,8 @@ static const SettingConstants settingsConstants[(int)SettingsOptions::SettingsOp
     {                     0,                                                                     9,                 1,                            0}, // PDMissingWarningCounter
     {                     0,                                                                0xFFFF,                 0,                 41431 /*EN*/}, // UILanguage
     {                     0,                                                                    50,                 1,                           20}, // PDNegTimeout
-    {                     0,                                                                     1,                 1,                            0}, // OLEDInversion
-    {        MIN_BRIGHTNESS,                                                        MAX_BRIGHTNESS,   BRIGHTNESS_STEP,           DEFAULT_BRIGHTNESS}, // OLEDBrightness
+    {                     0,                                                                     1,                 1,                            0}, // DisplayInversion
+    {        MIN_BRIGHTNESS,                                                        MAX_BRIGHTNESS,   BRIGHTNESS_STEP,           DEFAULT_BRIGHTNESS}, // DisplayBrightness
     {                     0,                                                                     6,                 1,                            1}, // LOGOTime
     {                     0,                                                                     1,                 1,                            0}, // CalibrateCJC
     {                     0,                                                                     1,                 1,                            0}, // BluetoothLE

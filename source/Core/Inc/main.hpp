@@ -1,6 +1,6 @@
 #ifndef __MAIN_H
 #define __MAIN_H
-#include "OLED.hpp"
+#include "Display.hpp"
 #include "Setup.h"
 #include "Types.h"
 #include <stdint.h>

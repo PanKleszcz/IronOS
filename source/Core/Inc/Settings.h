@@ -54,8 +54,8 @@ enum SettingsOptions {
   PDMissingWarningCounter        = 30, // Counter of how many times we have warned we cannot detect the pd interface
   UILanguage                     = 31, // Selected UI Language code, null-terminated *only if* the length is less than 8 chars
   PDNegTimeout                   = 32, // PD timeout in 100ms steps
-  OLEDInversion                  = 33, // Invert the colours on the display
-  OLEDBrightness                 = 34, // Brightness for the OLED display
+  DisplayInversion               = 33, // Invert the colours on the display
+  DisplayBrightness              = 34, // Brightness for the OLED display
   LOGOTime                       = 35, // Duration the logo will be displayed for
   CalibrateCJC                   = 36, // Toggle calibrate CJC at next boot
   BluetoothLE                    = 37, // Toggle BLE if present

@@ -5,7 +5,7 @@ extern "C" {
 #include "FreeRTOSConfig.h"
 }
 #include "Buttons.hpp"
-#include "OLED.hpp"
+#include "Display.hpp"
 #include "OperatingModeUtilities.h"
 #include "Settings.h"
 #include "TipThermoModel.h"

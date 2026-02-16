@@ -12,7 +12,7 @@
 #include "Setup.h"
 // #include "configuration.h"
 // #include <I2C_Wrapper.hpp>
-#include "OLED.hpp"
+#include "Display.hpp"
 #include "main.hpp"
 #include "n32l40x_rcc.h"
 #include "n32l40x_wwdg.h"
