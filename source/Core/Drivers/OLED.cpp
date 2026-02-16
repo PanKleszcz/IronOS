@@ -102,38 +102,37 @@ uint32_t OLED::displayChecksum;
 
 // TODO: create separate class for this
 
-
 const FRToSSPI::SPI_CMD lcdInitCmds[] = {
-  {ST7735_SWRESET, FRToSSPI::SPI_CMD_DELAY_MS, 150, NULL},
-  {ST7735_SLPOUT, FRToSSPI::SPI_CMD_DELAY_MS, 200, NULL},
+    {ST7735_SWRESET, FRToSSPI::SPI_CMD_DELAY_MS, 150,                                                                                                        NULL},
+    { ST7735_SLPOUT, FRToSSPI::SPI_CMD_DELAY_MS, 200,                                                                                                        NULL},
 
-  {ST7735_FRMCTR1, FRToSSPI::SPI_CMD_PAYLOAD, 3, (uint8_t[]){0x05, 0x3A, 0x3A}},
-  {ST7735_FRMCTR2, FRToSSPI::SPI_CMD_PAYLOAD, 3, (uint8_t[]){0x05, 0x3A, 0x3A}},
-  {ST7735_FRMCTR3, FRToSSPI::SPI_CMD_PAYLOAD, 6, (uint8_t[]){0x05, 0x3A, 0x3A, 0x05, 0x3A, 0x3A}},
+    {ST7735_FRMCTR1,  FRToSSPI::SPI_CMD_PAYLOAD,   3,                                                                               (uint8_t[]){0x05, 0x3A, 0x3A}},
+    {ST7735_FRMCTR2,  FRToSSPI::SPI_CMD_PAYLOAD,   3,                                                                               (uint8_t[]){0x05, 0x3A, 0x3A}},
+    {ST7735_FRMCTR3,  FRToSSPI::SPI_CMD_PAYLOAD,   6,                                                             (uint8_t[]){0x05, 0x3A, 0x3A, 0x05, 0x3A, 0x3A}},
 
-  {ST7735_PWCTR1, FRToSSPI::SPI_CMD_PAYLOAD, 3, (uint8_t[]){0x62, 0x02, 0x04}},
-  {ST7735_PWCTR2, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0xC0}},
-  {ST7735_PWCTR3, FRToSSPI::SPI_CMD_PAYLOAD, 2, (uint8_t[]){0x0D, 0x00}},
-  {ST7735_PWCTR4, FRToSSPI::SPI_CMD_PAYLOAD, 2, (uint8_t[]){0x8D, 0x6A}},
-  {ST7735_PWCTR5, FRToSSPI::SPI_CMD_PAYLOAD, 2, (uint8_t[]){0x8D, 0xEE}},
+    { ST7735_PWCTR1,  FRToSSPI::SPI_CMD_PAYLOAD,   3,                                                                               (uint8_t[]){0x62, 0x02, 0x04}},
+    { ST7735_PWCTR2,  FRToSSPI::SPI_CMD_PAYLOAD,   1,                                                                                           (uint8_t[]){0xC0}},
+    { ST7735_PWCTR3,  FRToSSPI::SPI_CMD_PAYLOAD,   2,                                                                                     (uint8_t[]){0x0D, 0x00}},
+    { ST7735_PWCTR4,  FRToSSPI::SPI_CMD_PAYLOAD,   2,                                                                                     (uint8_t[]){0x8D, 0x6A}},
+    { ST7735_PWCTR5,  FRToSSPI::SPI_CMD_PAYLOAD,   2,                                                                                     (uint8_t[]){0x8D, 0xEE}},
 
-  {ST7735_GMCTRP1, FRToSSPI::SPI_CMD_PAYLOAD, 16, (uint8_t[]){0x10, 0x0E, 0x02, 0x03, 0x0E, 0x07, 0x02, 0x07, 0x0A, 0x12, 0x27, 0x37, 0x00, 0x0D, 0x0E, 0x10}},
-  {ST7735_GMCTRN1, FRToSSPI::SPI_CMD_PAYLOAD, 16, (uint8_t[]){0x10, 0x0E, 0x03, 0x03, 0x0F, 0x06, 0x02, 0x08, 0x0A, 0x13, 0x26, 0x36, 0x00, 0x0D, 0x0E, 0x10}},
+    {ST7735_GMCTRP1,  FRToSSPI::SPI_CMD_PAYLOAD,  16, (uint8_t[]){0x10, 0x0E, 0x02, 0x03, 0x0E, 0x07, 0x02, 0x07, 0x0A, 0x12, 0x27, 0x37, 0x00, 0x0D, 0x0E, 0x10}},
+    {ST7735_GMCTRN1,  FRToSSPI::SPI_CMD_PAYLOAD,  16, (uint8_t[]){0x10, 0x0E, 0x03, 0x03, 0x0F, 0x06, 0x02, 0x08, 0x0A, 0x13, 0x26, 0x36, 0x00, 0x0D, 0x0E, 0x10}},
 
-  {ST7735_INVCTR, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0x03}},
-  {ST7735_INVON, FRToSSPI::SPI_CMD_PAYLOAD, 0, NULL},
-  {ST7735_VMCTR1, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0x0E}},
-  {ST7735_MADCTL, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0x88}},
-  {ST7735_COLMOD, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0x05}},
+    { ST7735_INVCTR,  FRToSSPI::SPI_CMD_PAYLOAD,   1,                                                                                           (uint8_t[]){0x03}},
+    {  ST7735_INVON,  FRToSSPI::SPI_CMD_PAYLOAD,   0,                                                                                                        NULL},
+    { ST7735_VMCTR1,  FRToSSPI::SPI_CMD_PAYLOAD,   1,                                                                                           (uint8_t[]){0x0E}},
+    { ST7735_MADCTL,  FRToSSPI::SPI_CMD_PAYLOAD,   1,                                                                                           (uint8_t[]){0x88}},
+    { ST7735_COLMOD,  FRToSSPI::SPI_CMD_PAYLOAD,   1,                                                                                           (uint8_t[]){0x05}},
 
-  {ST7735_NORON, FRToSSPI::SPI_CMD_DELAY_MS, 10, NULL},
-  {ST7735_DISPON, FRToSSPI::SPI_CMD_DELAY_MS, 100, NULL},
+    {  ST7735_NORON, FRToSSPI::SPI_CMD_DELAY_MS,  10,                                                                                                        NULL},
+    { ST7735_DISPON, FRToSSPI::SPI_CMD_DELAY_MS, 100,                                                                                                        NULL},
 };
 
 FRToSSPI::SPI_CMD lcdSetAreaCmds[] = {
-  {ST7735_RASET, FRToSSPI::SPI_CMD_PAYLOAD, 4, (uint8_t[]){0, 16 + ST7735_XOFFSET, 0, 16 + OLED_WIDTH + ST7735_XOFFSET - 1}},
-  {ST7735_CASET, FRToSSPI::SPI_CMD_PAYLOAD, 4, (uint8_t[]){0, 24 + ST7735_YOFFSET, 0, 24 + OLED_HEIGHT + ST7735_YOFFSET - 1}},
-  {ST7735_RAMWR, FRToSSPI::SPI_CMD_PAYLOAD, 0, NULL},
+    {ST7735_RASET, FRToSSPI::SPI_CMD_PAYLOAD, 4,  (uint8_t[]){0, 16 + ST7735_XOFFSET, 0, 16 + OLED_WIDTH + ST7735_XOFFSET - 1}},
+    {ST7735_CASET, FRToSSPI::SPI_CMD_PAYLOAD, 4, (uint8_t[]){0, 24 + ST7735_YOFFSET, 0, 24 + OLED_HEIGHT + ST7735_YOFFSET - 1}},
+    {ST7735_RAMWR, FRToSSPI::SPI_CMD_PAYLOAD, 0,                                                                          NULL},
 };
 
 void OLED::setDrawingWindow(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
@@ -142,7 +141,7 @@ void OLED::setDrawingWindow(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
   lcdSetAreaCmds[1].data[1] = y + ST7735_YOFFSET;
   lcdSetAreaCmds[1].data[3] = y + h + ST7735_YOFFSET - 1;
 
-  SPI_CLASS::sendCmdChain(lcdSetAreaCmds, sizeof(lcdSetAreaCmds)/sizeof(*lcdSetAreaCmds));
+  SPI_CLASS::sendCmdChain(lcdSetAreaCmds, sizeof(lcdSetAreaCmds) / sizeof(*lcdSetAreaCmds));
 }
 
 /*
@@ -186,17 +185,17 @@ void OLED::initialize() {
   // TODO: create a separate SPI driver
 
   SPI_CLASS::init();
-  SPI_CLASS::sendCmdChain(lcdInitCmds, sizeof(lcdInitCmds)/sizeof(*lcdInitCmds));
+  SPI_CLASS::sendCmdChain(lcdInitCmds, sizeof(lcdInitCmds) / sizeof(*lcdInitCmds));
 
   // Erase background
   setDrawingWindow(0, 0, 160, 80);
-  SPI_CLASS::sendByteMutiple(0x00, 2*160*80);
+  SPI_CLASS::sendByteMutiple(0x00, 2 * 160 * 80);
 
   // Draw a nice frame for the emulated OLED display
   setDrawingWindow(12, 20, 136, 40);
-  SPI_CLASS::sendByteMutiple(0xFF, 2*136*40);
+  SPI_CLASS::sendByteMutiple(0xFF, 2 * 136 * 40);
   setDrawingWindow(14, 22, 132, 36);
-  SPI_CLASS::sendByteMutiple(0x00, 2*132*36);
+  SPI_CLASS::sendByteMutiple(0x00, 2 * 132 * 36);
 
   // for (int tries = 0; tries < 10; tries++) {
   //   if (I2C_CLASS::writeRegistersBulk(DEVICEADDR_OLED, OLED_Setup_Array, sizeof(OLED_Setup_Array) / sizeof(OLED_Setup_Array[0]))) {
@@ -537,50 +536,50 @@ void OLED::transitionScrollUp(const TickType_t viewEnterTime) {
 }
 
 void OLED::setRotation(bool leftHanded) {
-// #ifdef OLED_FLIP
-//   leftHanded = !leftHanded;
-// #endif /* OLED_FLIP */
-//   if (inLeftHandedMode == leftHanded) {
-//     return;
-//   }
-// #ifdef OLED_SEGMENT_MAP_REVERSED
-//   if (!leftHanded) {
-//     OLED_Setup_Array[9].val = 0xA1;
-//   } else {
-//     OLED_Setup_Array[9].val = 0xA0;
-//   }
-// #else
-//   if (leftHanded) {
-//     OLED_Setup_Array[9].val = 0xA1;
-//   } else {
-//     OLED_Setup_Array[9].val = 0xA0;
-//   }
-// #endif /* OLED_SEGMENT_MAP_REVERSED */
-//   // send command struct again with changes
-//   if (leftHanded) {
-//     OLED_Setup_Array[5].val = 0xC8; // c1?
-//   } else {
-//     OLED_Setup_Array[5].val = 0xC0;
-//   }
-//   // I2C_CLASS::writeRegistersBulk(DEVICEADDR_OLED, OLED_Setup_Array, sizeof(OLED_Setup_Array) / sizeof(OLED_Setup_Array[0]));
-//   osDelay(TICKS_10MS);
-//   inLeftHandedMode = leftHanded;
+  // #ifdef OLED_FLIP
+  //   leftHanded = !leftHanded;
+  // #endif /* OLED_FLIP */
+  //   if (inLeftHandedMode == leftHanded) {
+  //     return;
+  //   }
+  // #ifdef OLED_SEGMENT_MAP_REVERSED
+  //   if (!leftHanded) {
+  //     OLED_Setup_Array[9].val = 0xA1;
+  //   } else {
+  //     OLED_Setup_Array[9].val = 0xA0;
+  //   }
+  // #else
+  //   if (leftHanded) {
+  //     OLED_Setup_Array[9].val = 0xA1;
+  //   } else {
+  //     OLED_Setup_Array[9].val = 0xA0;
+  //   }
+  // #endif /* OLED_SEGMENT_MAP_REVERSED */
+  //   // send command struct again with changes
+  //   if (leftHanded) {
+  //     OLED_Setup_Array[5].val = 0xC8; // c1?
+  //   } else {
+  //     OLED_Setup_Array[5].val = 0xC0;
+  //   }
+  //   // I2C_CLASS::writeRegistersBulk(DEVICEADDR_OLED, OLED_Setup_Array, sizeof(OLED_Setup_Array) / sizeof(OLED_Setup_Array[0]));
+  //   osDelay(TICKS_10MS);
+  //   inLeftHandedMode = leftHanded;
 
-//   screenBuffer[5] = inLeftHandedMode ? OLED_GRAM_START_FLIP : OLED_GRAM_START; // display is shifted by 32 in left handed
-//                                                                                // mode as driver ram is 128 wide
-//   screenBuffer[7] = inLeftHandedMode ? OLED_GRAM_END_FLIP : OLED_GRAM_END;     // End address of the ram segment we are writing to (96 wide)
-//   screenBuffer[9] = inLeftHandedMode ? 0xC8 : 0xC0;
-//   // Force a screen refresh
-//   const int len = FRAMEBUFFER_START + (OLED_WIDTH * (OLED_HEIGHT / 8));
-//   // I2C_CLASS::Transmit(DEVICEADDR_OLED, screenBuffer, len);
-//   osDelay(TICKS_10MS);
-//   checkDisplayBufferChecksum();
+  //   screenBuffer[5] = inLeftHandedMode ? OLED_GRAM_START_FLIP : OLED_GRAM_START; // display is shifted by 32 in left handed
+  //                                                                                // mode as driver ram is 128 wide
+  //   screenBuffer[7] = inLeftHandedMode ? OLED_GRAM_END_FLIP : OLED_GRAM_END;     // End address of the ram segment we are writing to (96 wide)
+  //   screenBuffer[9] = inLeftHandedMode ? 0xC8 : 0xC0;
+  //   // Force a screen refresh
+  //   const int len = FRAMEBUFFER_START + (OLED_WIDTH * (OLED_HEIGHT / 8));
+  //   // I2C_CLASS::Transmit(DEVICEADDR_OLED, screenBuffer, len);
+  //   osDelay(TICKS_10MS);
+  //   checkDisplayBufferChecksum();
 }
 
 void OLED::setBrightness(uint8_t contrast) {
   // if (OLED_Setup_Array[15].val != contrast) {
   //   OLED_Setup_Array[15].val = contrast;
-    // I2C_CLASS::writeRegistersBulk(DEVICEADDR_OLED, &OLED_Setup_Array[14], 2);
+  // I2C_CLASS::writeRegistersBulk(DEVICEADDR_OLED, &OLED_Setup_Array[14], 2);
   // }
 }
 
@@ -588,7 +587,7 @@ void OLED::setInverseDisplay(bool inverse) {
   // uint8_t normalInverseCmd = inverse ? 0xA7 : 0xA6;
   // if (OLED_Setup_Array[21].val != normalInverseCmd) {
   //   OLED_Setup_Array[21].val = normalInverseCmd;
-    // I2C_CLASS::I2C_RegisterWrite(DEVICEADDR_OLED, 0x80, normalInverseCmd);
+  // I2C_CLASS::I2C_RegisterWrite(DEVICEADDR_OLED, 0x80, normalInverseCmd);
   // }
 }
 

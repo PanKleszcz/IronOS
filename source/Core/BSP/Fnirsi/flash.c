@@ -11,28 +11,26 @@
 #define FLASH_PAGE_SIZE (0x200)
 
 void flash_save_buffer(const uint8_t *buffer, const uint16_t length) {
-    // TODO: implement length > FLASH_PAGE_SIZE and SETTINGS_START_PAGE not at page boundary
-    uint8_t pageBackup[FLASH_PAGE_SIZE];
-    memcpy(pageBackup, (uint8_t*)SETTINGS_START_PAGE, FLASH_PAGE_SIZE);
+  // TODO: implement length > FLASH_PAGE_SIZE and SETTINGS_START_PAGE not at page boundary
+  uint8_t pageBackup[FLASH_PAGE_SIZE];
+  memcpy(pageBackup, (uint8_t *)SETTINGS_START_PAGE, FLASH_PAGE_SIZE);
 
-    // overwrite with given data:
-    memcpy(pageBackup, buffer, length);
+  // overwrite with given data:
+  memcpy(pageBackup, buffer, length);
 
-    FLASH_Unlock();
+  FLASH_Unlock();
+  resetWatchdog();
+
+  FLASH_EraseOnePage(SETTINGS_START_PAGE);
+  resetWatchdog();
+
+  for (size_t offset = 0; offset < FLASH_PAGE_SIZE; offset += 4) {
+    FLASH_ProgramWord(SETTINGS_START_PAGE + offset, *(uint32_t *)(pageBackup + offset));
     resetWatchdog();
+  }
 
-    FLASH_EraseOnePage(SETTINGS_START_PAGE);
-    resetWatchdog();
-
-    for(size_t offset = 0; offset<FLASH_PAGE_SIZE; offset+=4) {
-        FLASH_ProgramWord(SETTINGS_START_PAGE + offset, *(uint32_t*)(pageBackup+offset));
-        resetWatchdog();
-    }
-
-    FLASH_Lock();
-    resetWatchdog();
+  FLASH_Lock();
+  resetWatchdog();
 }
 
-void flash_read_buffer(uint8_t *buffer, const uint16_t length) {
-    memcpy(buffer, (uint8_t *)SETTINGS_START_PAGE, length);
-}
+void flash_read_buffer(uint8_t *buffer, const uint16_t length) { memcpy(buffer, (uint8_t *)SETTINGS_START_PAGE, length); }

@@ -8,20 +8,18 @@
 #include "IRQ.h"
 
 #include "cmsis_os.h"
-#include "n32l40x_tim.h"
 #include "n32l40x_adc.h"
+#include "n32l40x_tim.h"
 
 #include "Pins.h"
 #include "configuration.h"
 #include <stdbool.h>
 
 // Systick is used by FreeRTOS tick
-void SysTick_Handler(void) {
-    osSystickHandler();
-}
+void SysTick_Handler(void) { osSystickHandler(); }
 
 volatile uint8_t measureOverrun;
-void ADC_IRQHandler(void) {
+void             ADC_IRQHandler(void) {
   if (SET == ADC_GetIntStatus(ADC, ADC_INT_JENDC)) {
     ADC_ClearIntPendingBit(ADC, ADC_INT_JENDC);
 
@@ -35,8 +33,8 @@ void ADC_IRQHandler(void) {
 }
 
 extern uint16_t PWMSafetyTimer;
-extern uint8_t pendingPWM;
-void TIM2_IRQHandler(void) {
+extern uint8_t  pendingPWM;
+void            TIM2_IRQHandler(void) {
   // Corresponds to ST PeriodElapsed
   if (SET == TIM_GetIntStatus(TIM2, TIM_INT_UPDATE)) {
     TIM_ClrIntPendingBit(TIM2, TIM_INT_UPDATE);
@@ -60,11 +58,9 @@ void TIM2_IRQHandler(void) {
   if (SET == TIM_GetIntStatus(TIM2, TIM_INT_CC2)) {
     TIM_ClrIntPendingBit(TIM2, TIM_INT_CC2);
     TIM1->CCDAT1 = 0;
-      return;
+    return;
   }
 
-
-  for(;;) {
-
+  for (;;) {
   }
 }

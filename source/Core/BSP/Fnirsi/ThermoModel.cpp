@@ -10,9 +10,9 @@
 #include "Utils.hpp"
 #include "configuration.h"
 
-extern uint16_t   tipSenseResistancex10Ohms;
+extern uint16_t tipSenseResistancex10Ohms;
 
 TemperatureType_t TipThermoModel::convertuVToDegC(uint32_t tipuVDelta) {
   // let's assume 21uV per 1C here
-   return (tipuVDelta) / 21;
+  return (tipuVDelta) / 21;
 }

@@ -16,15 +16,15 @@
 // #include "main.hpp"
 // #include <IRQ.h>
 
-volatile uint16_t    PWMSafetyTimer   = 0;
-volatile uint8_t     pendingPWM       = 0;
+volatile uint16_t PWMSafetyTimer = 0;
+volatile uint8_t  pendingPWM     = 0;
 
 // Our main PWM timer runs at 20Hz, 400 ticks per cycle (8kHz tick)
 // ADC runs at 8MHz and needs less than one timer tick to perform all conversions
 const uint16_t        powerPWM         = 390;
 static const uint16_t holdoffTicks     = 9;
 static const uint16_t tempMeasureTicks = 1;
-uint16_t totalPWM = powerPWM + tempMeasureTicks + holdoffTicks; // TIM2 init period, the full PWM cycle
+uint16_t              totalPWM         = powerPWM + tempMeasureTicks + holdoffTicks; // TIM2 init period, the full PWM cycle
 
 uint16_t ADCReadings[ADC_SAMPLES]; // Used to store the adc readings for the handle cold junction temp
 
@@ -32,7 +32,7 @@ uint16_t getADCHandleTemp(uint8_t sample) {
   static history<uint16_t, ADC_FILTER_LEN> filter = {{0}, 0, 0};
   if (sample) {
     uint32_t sum = 0;
-    for (uint8_t i = 2; i < ADC_SAMPLES; i+=ADC_CHANNELS) {
+    for (uint8_t i = 2; i < ADC_SAMPLES; i += ADC_CHANNELS) {
       sum += ADCReadings[i];
     }
     filter.update(sum);
@@ -46,18 +46,18 @@ uint16_t getHandleTemperature(uint8_t sample) {
   // That gives roughly 39.7 counts per 1C
   // Temperature in C is calculated as (13107-ADC)/39.7+25
   // We want to return above value times 10 so simplified it's ~ 3551-ADC/4
-  return 3551-getADCHandleTemp(sample)/4;
+  return 3551 - getADCHandleTemp(sample) / 4;
 }
 
 uint16_t getADCVin(uint8_t sample) {
   // Use regular channels as Vin source
   static history<uint16_t, ADC_FILTER_LEN> filter = {{0}, 0, 0};
   if (sample) {
-      uint32_t sum = 0;
-      for (uint8_t i = 3; i < ADC_SAMPLES; i+=ADC_CHANNELS) {
-        sum += ADCReadings[i];
-      }
-      filter.update(sum);
+    uint32_t sum = 0;
+    for (uint8_t i = 3; i < ADC_SAMPLES; i += ADC_CHANNELS) {
+      sum += ADCReadings[i];
+    }
+    filter.update(sum);
   }
   return filter.average();
 }
@@ -74,18 +74,18 @@ uint16_t getInputVoltageX10(uint16_t divisor, uint8_t sample) {
 
 // Returns either average or instant value. When sample is set the samples from the injected ADC are copied to the filter and then the raw reading is returned
 uint16_t getTipRawTemp(uint8_t sample) {
-    static history<uint16_t, ADC_FILTER_LEN> filter = {{0}, 0, 0};
-    if (sample) {
-        uint16_t latestADC = 0;
+  static history<uint16_t, ADC_FILTER_LEN> filter = {{0}, 0, 0};
+  if (sample) {
+    uint16_t latestADC = 0;
 
-        latestADC += ADC->JDAT1;
-        latestADC += ADC->JDAT2;
-        latestADC += ADC->JDAT3;
-        latestADC += ADC->JDAT4;
-        latestADC *= 2; // pretend we're doing x8 oversampling
-        filter.update(latestADC);
-    }
-    return filter.average();
+    latestADC += ADC->JDAT1;
+    latestADC += ADC->JDAT2;
+    latestADC += ADC->JDAT3;
+    latestADC += ADC->JDAT4;
+    latestADC *= 2; // pretend we're doing x8 oversampling
+    filter.update(latestADC);
+  }
+  return filter.average();
 }
 
 static void switchToFastPWM(void) {
@@ -94,7 +94,7 @@ static void switchToFastPWM(void) {
   TIM2->AR     = totalPWM - 1;
   TIM2->CCDAT1 = powerPWM + holdoffTicks - 1;
   TIM2->CCDAT4 = powerPWM - 1;
-  TIM2->PSC = 3999; // 8kHz -> 125uS per tick
+  TIM2->PSC    = 3999; // 8kHz -> 125uS per tick
 }
 
 void setTipPWM(const uint8_t pulse, const bool shouldUseFastModePWM) {
@@ -103,30 +103,20 @@ void setTipPWM(const uint8_t pulse, const bool shouldUseFastModePWM) {
   pendingPWM = pulse;
 }
 
-uint8_t getButtonA() {
-  return GPIO_ReadInputDataBit(BUTTON_Port, BUTTON_DOWN_Pin) == Bit_RESET ? 1 : 0;
-}
-uint8_t getButtonB() {
-  return GPIO_ReadInputDataBit(BUTTON_Port, BUTTON_UP_Pin) == Bit_RESET ? 1 : 0;
-}
+uint8_t getButtonA() { return GPIO_ReadInputDataBit(BUTTON_Port, BUTTON_DOWN_Pin) == Bit_RESET ? 1 : 0; }
+uint8_t getButtonB() { return GPIO_ReadInputDataBit(BUTTON_Port, BUTTON_UP_Pin) == Bit_RESET ? 1 : 0; }
 
-void BSPInit(void) {
-  switchToFastPWM();
-}
+void BSPInit(void) { switchToFastPWM(); }
 
-void resetWatchdog() {
-    IWDG_ReloadKey();
-}
+void resetWatchdog() { IWDG_ReloadKey(); }
 
-void reboot() {
-  NVIC_SystemReset();
-}
+void reboot() { NVIC_SystemReset(); }
 
 void delay_ms(uint16_t count) {
-    volatile uint32_t i = count*4000; // TODO: meh
-    while(i--){
-        __NOP();
-    }
+  volatile uint32_t i = count * 4000; // TODO: meh
+  while (i--) {
+    __NOP();
+  }
 }
 
 uint8_t       lastTipResistance        = 0; // default to unknown
@@ -234,7 +224,7 @@ uint8_t preStartChecks() {
 // N32L403 ID is either 96 or 128 bit long. Let's use first 64 bits of the 96bit one for now.
 uint64_t getDeviceID() {
   union {
-    uint8_t bytes[UID_LENGTH];
+    uint8_t  bytes[UID_LENGTH];
     uint64_t deviceID;
   } uid;
   GetUID(uid.bytes);
@@ -247,31 +237,27 @@ uint8_t preStartChecksDone() {
 }
 
 uint8_t getTipResistanceX10() {
-    // TODO: IMPLEMENT
-    return TIP_RESISTANCE; // Auto mode
+  // TODO: IMPLEMENT
+  return TIP_RESISTANCE; // Auto mode
 }
 
 bool isTipShorted() {
-    // TODO: IMPLEMENT
-    return false;
+  // TODO: IMPLEMENT
+  return false;
 }
 uint16_t getTipThermalMass() {
-    // TODO: IMPLEMENT
-    return TIP_THERMAL_MASS;
+  // TODO: IMPLEMENT
+  return TIP_THERMAL_MASS;
 }
 uint16_t getTipInertia() {
-    // TODO: IMPLEMENT
-    return TIP_THERMAL_INERTIA;
+  // TODO: IMPLEMENT
+  return TIP_THERMAL_INERTIA;
 }
 
 void showBootLogo(void) {
-    // TODO: IMPLEMENT
+  // TODO: IMPLEMENT
 }
 
-bool getFUS302IRQLow() {
-  return false;
-}
+bool getFUS302IRQLow() { return false; }
 
-void unstick_I2C() {
-  /* What is brown and sticky? A stick. */
-}
+void unstick_I2C() { /* What is brown and sticky? A stick. */ }
