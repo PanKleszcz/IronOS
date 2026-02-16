@@ -1,5 +1,9 @@
 # Version Changes
 
+## v0.01
+
+ - Fnirsi HS-02 release
+
 ## v2.23
 
 
