@@ -26,4 +26,5 @@ void preRToSInit() {
 //   HAL_Init();
 //   Setup_HAL(); // Setup all the HAL objects
   BSPInit();
+  FRToSSPI::FRToSInit();
 }

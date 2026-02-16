@@ -22,17 +22,14 @@
 #define LCD_MODE_CMD()  GPIO_ResetBits(LCD_Port, LCD_CMD_Pin)
 #define LCD_MODE_DATA()   GPIO_SetBits(LCD_Port, LCD_CMD_Pin)
 
-// TODO: this can't be
-static void _delay_ms(uint32_t ms) {
-    for(volatile uint32_t i = 0; i < ms * 2000; i++);
-}
+SemaphoreHandle_t FRToSSPI::xSemaphore = nullptr;
+StaticSemaphore_t FRToSSPI::xSemaphoreBuffer;
 
 static void _spiSendByte(uint8_t byte) {
     while(SPI_I2S_GetStatus(SPI1, SPI_I2S_TE_FLAG) == RESET);
     SPI_I2S_TransmitData(SPI1, byte);
     while(SPI_I2S_GetStatus(SPI1, SPI_I2S_BUSY_FLAG) == SET);
 }
-
 
 void FRToSSPI::sendCmd(uint8_t cmd) {
     LCD_MODE_CMD();
@@ -71,6 +68,7 @@ void FRToSSPI::sendPixels(uint8_t* data, size_t length) {
     LCD_CS_LOW();
     for(size_t i = 0; i < length; i++) {
         for(uint8_t b=0; b<8; b++) {
+            lock();
             if(data[i] & (1<<b)) {
                 _spiSendByte(0xFF);
                 _spiSendByte(0xFF);
@@ -78,33 +76,51 @@ void FRToSSPI::sendPixels(uint8_t* data, size_t length) {
                 _spiSendByte(0x00);
                 _spiSendByte(0x00);
             }
+            unlock();
         }
     }
     LCD_CS_HIGH();
 }
 
 void FRToSSPI::sendCmdChain(const FRToSSPI::SPI_CMD* commands, size_t length) {
+    lock();
     for(size_t i = 0; i < length; i++) {
         FRToSSPI::sendCmd(commands[i].cmd);
         if(commands[i].type == FRToSSPI::SPI_CMD_PAYLOAD) {
             sendData(commands[i].data, commands[i].len);
         } else if (commands[i].type == FRToSSPI::SPI_CMD_DELAY_MS) {
-            _delay_ms(commands[i].len);
+            vTaskDelay(commands[i].len);
         }
     }
+    unlock();
 }
 
 // TODO: move it elsewhere
-static void lcdReset(void) {
+void FRToSSPI::sendLcdReset(void) {
+    lock();
     LCD_RST_HIGH();
-    delay_ms(10);
+    vTaskDelay(TICKS_10MS);
     LCD_RST_LOW();
-    delay_ms(10);
+    vTaskDelay(TICKS_10MS);
     LCD_RST_HIGH();
-    delay_ms(120);
+    vTaskDelay(TICKS_100MS);
+    unlock();
 }
 
 
+bool FRToSSPI::lock() {
+  if (xSemaphore == nullptr) {
+    return false;
+  }
+  return xSemaphoreTake(xSemaphore, TICKS_SECOND) == pdTRUE;
+}
+
+void FRToSSPI::unlock() {
+  if (xSemaphore == nullptr) {
+    return;
+  }
+  xSemaphoreGive(xSemaphore);
+}
 
 void FRToSSPI::init() {
 
@@ -113,7 +129,7 @@ void FRToSSPI::init() {
     GPIO_InitStruct(&GPIO_InitStructure);
 
     RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_GPIOA, ENABLE);
-    RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_SPI1, ENABLE);
+    RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_SPI1, ENABLE);  // APB2 runs at 32MHz
 
     GPIO_InitStructure.Pin = LCD_SCK_Pin | LCD_MOSI_Pin;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
@@ -136,12 +152,12 @@ void FRToSSPI::init() {
     SPI_InitStructure.CLKPHA = SPI_CLKPHA_SECOND_EDGE;
     SPI_InitStructure.NSS = SPI_NSS_SOFT;
 
-    SPI_InitStructure.BaudRatePres = SPI_BR_PRESCALER_4; // 16MHz
+    SPI_InitStructure.BaudRatePres = SPI_BR_PRESCALER_2; // 16MHz is max what ST7735 supports
 
     SPI_InitStructure.FirstBit = SPI_FB_MSB;
     SPI_Init(SPI1, &SPI_InitStructure);
 
     SPI_Enable(SPI1, ENABLE);
 
-    lcdReset();
+    sendLcdReset();
 }

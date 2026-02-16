@@ -1,23 +1,22 @@
 /*
- * FRToSSPI.hpp
+ * SPI_Wrapper.hpp
  *
  *  Created on: 14Apr.,2018
  *      Author: Ralim
  */
 
-#ifndef FRTOSSPI_HPP_
-#define FRTOSSPI_HPP_
+#pragma once
 
 #include "cmsis_os.h"
 
 class FRToSSPI {
 public:
-  // static void FRToSInit() {
-  //   if (I2CSemaphore == nullptr) {
-  //     I2CSemaphore = xSemaphoreCreateBinaryStatic(&xSemaphoreBuffer);
-  //     xSemaphoreGive(I2CSemaphore);
-  //   }
-  // }
+  static void FRToSInit() {
+    if (xSemaphore == nullptr) {
+      xSemaphore = xSemaphoreCreateBinaryStatic(&xSemaphoreBuffer);
+      xSemaphoreGive(xSemaphore);
+    }
+  }
   static void init(void);
 
 
@@ -55,6 +54,7 @@ public:
   // Consider abstracting parts of this implementation outside as LCD class
   static void sendCmdChain(const FRToSSPI::SPI_CMD* commands, size_t length);
   static void sendPixels(uint8_t* data, size_t length); // similar to sendData but converts OLED to LCD
+  static void sendLcdReset(void);
 
 //     const uint8_t reg;      // The register to write to
 //     uint8_t       val;      // The value to write to this register
@@ -63,11 +63,8 @@ public:
 //   static bool writeRegistersBulk(const uint8_t address, const I2C_REG *registers, const uint8_t registersLength);
 
 private:
-//   static void              unlock();
-//   static bool              lock();
-//   static void              I2C_Unstick();
-//   static SemaphoreHandle_t I2CSemaphore;
-//   static StaticSemaphore_t xSemaphoreBuffer;
+  static void              unlock();
+  static bool              lock();
+  static SemaphoreHandle_t xSemaphore;
+  static StaticSemaphore_t xSemaphoreBuffer;
 };
-
-#endif /* FRTOSI2C_HPP_ */

@@ -139,8 +139,6 @@ public:
       // DMA tx time is ~ 20mS Ensure after calling this you delay for at least 25ms
       // or we need to goto double buffering
 
-      // setDrawingWindow(16, 24, OLED_WIDTH, OLED_HEIGHT);
-      // SPI_CLASS::sendPixels(screenBuffer, len);
       setDrawingWindow(16, 24, OLED_WIDTH, 8);
       SPI_CLASS::sendPixels(stripPointers[0], len/4);
       setDrawingWindow(16, 32, OLED_WIDTH, 8);
