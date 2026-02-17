@@ -213,7 +213,7 @@
 #define USB_PD_I2CBB2        1
 #define USB_PD_VMAX          28 // Device supposedly can do 28V; looks like vmax is 33 ish
 #define OLED_128x32          1
-#define OLED_FLIP            1
+#define DISPLAY_FLIP         1
 #define HAS_SPLIT_POWER_PATH 1
 #define TEMP_NTC             1
 #define ACCEL_I2CBB1         1
@@ -237,7 +237,7 @@
 #define TIP_RESISTANCE   45 // x10 ohms, 4.5 typical for ts80 tips
 #define I2C_SOFT_BUS_2   1
 #define LIS_ORI_FLIP
-#define OLED_FLIP
+#define DISPLAY_FLIP
 #define TIPTYPE_TS80 1 // Only one tip type so far
 
 #endif /* TS80(P) */

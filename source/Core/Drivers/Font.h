@@ -11,6 +11,12 @@
 #define FONT_H_
 #include "Translation.h"
 
+enum class FontStyle {
+  SMALL,
+  LARGE,
+  EXTRAS,
+};
+
 #define FONT_12_WIDTH 12
 // THE MAIN FONTS ARE NO LONGER HERE, MOVED TO PYTHON AUTO GEN
 // THESE ARE ONLY THE SYMBOL FONTS
