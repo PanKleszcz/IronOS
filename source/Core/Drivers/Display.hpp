@@ -110,7 +110,6 @@ public:
 
 private:
   static void         drawChar(uint16_t charCode, FontStyle fontStyle, const uint8_t soft_x_limit); // Draw a character to the current cursor location
-  static uint8_t     *stripPointers[4]; // Pointers to the strips to allow for buffer having extra content
   static bool         inLeftHandedMode; // Whether the screen is in left or not (used for offsets in GRAM)
   static bool         initDone;
   static DisplayState displayState;

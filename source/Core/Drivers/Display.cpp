@@ -16,7 +16,6 @@
 #include <string.h>
 
 // rendering to the buffer
-uint8_t              *Display::stripPointers[4]; // Pointers to the strips to allow for buffer having extra content
 bool                  Display::inLeftHandedMode; // Whether the screen is in left or not (used for offsets in GRAM)
 Display::DisplayState Display::displayState;
 int16_t               Display::cursor_x, Display::cursor_y;
