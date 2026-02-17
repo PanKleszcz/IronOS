@@ -363,9 +363,7 @@ S_SRCS:=$(shell find $(DEVICE_BSP_DIR) -type f -name '*.S')
 
 
 # Code optimisation ------------------------------------------------------------
-OPTIM=-Og                             \
-      -ffunction-sections             \
-      -fdata-sections                 \
+OPTIM=-Os                             \
       -fno-jump-tables                \
       -foptimize-strlen               \
       -faggressive-loop-optimizations \
@@ -377,6 +375,8 @@ OPTIM=-Og                             \
       -finline-functions              \
       -findirect-inlining             \
       -fdiagnostics-color             \
+      -ffunction-sections             \
+      -fdata-sections                 \
       -fshort-enums                   \
       -fsingle-precision-constant     \
       -fno-common                     \
@@ -483,9 +483,7 @@ CXXFLAGS=$(DEV_CXXFLAGS)        \
        -fno-use-cxa-atexit      \
        -fno-strict-aliasing     \
        -fno-threadsafe-statics  \
-       -T$(LDSCRIPT) \
-       -Og \
-       -g
+       -T$(LDSCRIPT)
 
 CFLAGS=$(DEV_CFLAGS)     \
        $(CPUFLAGS)       \
@@ -495,7 +493,7 @@ CFLAGS=$(DEV_CFLAGS)     \
      -D${COMPILER}       \
      -MMD                \
      -std=gnu11          \
-     -g                 \
+     -g3                 \
        $(OPTIM)          \
      -T$(LDSCRIPT)       \
      -c
