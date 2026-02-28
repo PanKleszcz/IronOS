@@ -37,7 +37,7 @@ static void clockInit(void) {
   RCC->CFG |= RCC_CFG_APB2PRES_DIV2; // APB2 runs up to 32MHz
 
   FLASH->AC &= (uint32_t)((uint32_t)~FLASH_AC_LATENCY);
-  FLASH->AC |= (uint32_t)(FLASH_AC_LATENCY_3);
+  FLASH->AC |= (uint32_t)(FLASH_AC_LATENCY_1); // 1 cycle for 32MHz <= Sysclk <= 64MHz
 
   /* Select PLL as system clock source */
   RCC->CFG &= (uint32_t)((uint32_t)~(RCC_CFG_SCLKSW));
