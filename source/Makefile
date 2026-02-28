@@ -300,7 +300,7 @@ $(info Building for Fnirsi )
 DEVICE_BSP_DIR=./Core/BSP/Fnirsi
 LDSCRIPT=${DEVICE_BSP_DIR}/Scripts/n32l403_flash_user.ld
 
-flash_size=106k
+flash_size=104k
 bootldr_size=0x5800
 
 DEV_GLOBAL_DEFS=-D N32L40X              \
