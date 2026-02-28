@@ -22,6 +22,33 @@ alignas(uint32_t) uint8_t LCD::screenBuffer[LCD_WIDTH * (LCD_HEIGHT / 8)]; // Th
 alignas(uint32_t) uint8_t LCD::secondFrameBuffer[LCD_WIDTH * (LCD_HEIGHT / 8)];
 uint32_t LCD::displayChecksum;
 
+// ST7735 Commands
+#define ST7735_NOP     0x00
+#define ST7735_SWRESET 0x01
+#define ST7735_SLPOUT  0x11
+#define ST7735_NORON   0x13
+#define ST7735_INVOFF  0x20
+#define ST7735_INVON   0x21
+#define ST7735_DISPOFF 0x28
+#define ST7735_DISPON  0x29
+#define ST7735_CASET   0x2A
+#define ST7735_RASET   0x2B
+#define ST7735_RAMWR   0x2C
+#define ST7735_MADCTL  0x36
+#define ST7735_COLMOD  0x3A
+#define ST7735_FRMCTR1 0xB1
+#define ST7735_FRMCTR2 0xB2
+#define ST7735_FRMCTR3 0xB3
+#define ST7735_INVCTR  0xB4
+#define ST7735_PWCTR1  0xC0
+#define ST7735_PWCTR2  0xC1
+#define ST7735_PWCTR3  0xC2
+#define ST7735_PWCTR4  0xC3
+#define ST7735_PWCTR5  0xC4
+#define ST7735_VMCTR1  0xC5
+#define ST7735_GMCTRP1 0xE0
+#define ST7735_GMCTRN1 0xE1
+
 const FRToSSPI::SPI_CMD lcdInitCmds[] = {
     {ST7735_SWRESET, FRToSSPI::SPI_CMD_DELAY_MS, 150,                                                                                                        NULL},
     { ST7735_SLPOUT, FRToSSPI::SPI_CMD_DELAY_MS, 200,                                                                                                        NULL},
@@ -50,9 +77,9 @@ const FRToSSPI::SPI_CMD lcdInitCmds[] = {
 };
 
 FRToSSPI::SPI_CMD lcdSetAreaCmds[] = {
-    {ST7735_RASET, FRToSSPI::SPI_CMD_PAYLOAD, 4,  (uint8_t[]){0, 16 + ST7735_XOFFSET, 0, 16 + LCD_WIDTH + ST7735_XOFFSET - 1}},
-    {ST7735_CASET, FRToSSPI::SPI_CMD_PAYLOAD, 4, (uint8_t[]){0, 24 + ST7735_YOFFSET, 0, 24 + LCD_HEIGHT + ST7735_YOFFSET - 1}},
-    {ST7735_RAMWR, FRToSSPI::SPI_CMD_PAYLOAD, 0,                                                                         NULL},
+    {ST7735_RASET, FRToSSPI::SPI_CMD_PAYLOAD, 4,  (uint8_t[]){0, ST7735_XOFFSET, 0, LCD_WIDTH + ST7735_XOFFSET - 1}},
+    {ST7735_CASET, FRToSSPI::SPI_CMD_PAYLOAD, 4, (uint8_t[]){0, ST7735_YOFFSET, 0, LCD_HEIGHT + ST7735_YOFFSET - 1}},
+    {ST7735_RAMWR, FRToSSPI::SPI_CMD_PAYLOAD, 0,                                                               NULL},
 };
 
 void LCD::setDrawingWindow(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
@@ -91,7 +118,7 @@ void LCD::initialize() {
 
   // Erase background
   setDrawingWindow(0, 0, 160, 80);
-  FRToSSPI::sendByteMutiple(0x00, 2 * 160 * 80);
+  FRToSSPI::sendByteMutiple(0x80, 2 * 160 * 80);
 
   // Draw a nice frame for the emulated OLED display
   setDrawingWindow(12, 20, 136, 40);

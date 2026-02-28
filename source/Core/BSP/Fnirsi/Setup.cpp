@@ -7,6 +7,7 @@
 #include "Setup.h"
 #include "BSP.h"
 #include "Pins.h"
+#include "SPI_Wrapper.hpp"
 #include "cmsis_os.h"
 #include "configuration.h"
 #include "n32l40x.h"
@@ -62,29 +63,42 @@ static void iwdgInit(void) {
 
 static void systickInit(void) {
   SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);
-  SysTick_Config(8000); // 1KHz
-  NVIC_SetPriority(SysTick_IRQn, 0);
+  SysTick_Config(8000 - 1); // 1KHz
+  NVIC_SetPriority(SysTick_IRQn, 15);
   NVIC_EnableIRQ(SysTick_IRQn);
 }
 
 static void spiInit(void) {
 
+  SPI_I2S_DeInit(SPI1);
+
   // Init SPI GPIO
   GPIO_InitType GPIO_InitStructure;
   GPIO_InitStruct(&GPIO_InitStructure);
 
+  RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_AFIO, ENABLE);
   RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_GPIOA, ENABLE);
   RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_SPI1, ENABLE);
 
   GPIO_InitStructure.Pin            = LCD_SCK_Pin | LCD_MOSI_Pin;
+  GPIO_InitStructure.GPIO_Current   = GPIO_DC_12mA;
+  GPIO_InitStructure.GPIO_Slew_Rate = GPIO_Slew_Rate_High;
+  GPIO_InitStructure.GPIO_Pull      = GPIO_Pull_Up;
+  GPIO_InitStructure.GPIO_Mode      = GPIO_Mode_Out_PP;
+  GPIO_InitPeripheral(LCD_Port, &GPIO_InitStructure); // silicone bug workaround (see N32L40x errata 6.1.3)
+
   GPIO_InitStructure.GPIO_Mode      = GPIO_Mode_AF_PP;
   GPIO_InitStructure.GPIO_Alternate = GPIO_AF0_SPI1;
   GPIO_InitPeripheral(LCD_Port, &GPIO_InitStructure);
 
   GPIO_InitStructure.Pin            = LCD_RESET_Pin | LCD_CMD_Pin | LCD_CS_Pin;
   GPIO_InitStructure.GPIO_Mode      = GPIO_Mode_Out_PP;
+  GPIO_InitStructure.GPIO_Pull      = GPIO_No_Pull;
   GPIO_InitStructure.GPIO_Alternate = GPIO_NO_AF;
   GPIO_InitPeripheral(LCD_Port, &GPIO_InitStructure);
+
+  GPIO_SetBits(LCD_Port, LCD_CS_Pin);
+  GPIO_SetBits(LCD_Port, LCD_CMD_Pin);
 
   // Init SPI itself
   SPI_InitType SPI_InitStructure;
@@ -106,9 +120,15 @@ static void spiInit(void) {
 }
 
 static void gpioInit(void) {
+
+  GPIO_DeInit(GPIOA);
+  GPIO_DeInit(GPIOB);
+  GPIO_DeInit(GPIOD);
+
   GPIO_InitType GPIO_InitStructure;
   GPIO_InitStruct(&GPIO_InitStructure);
 
+  RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_AFIO, ENABLE); // Alternative Function Input/Output
   RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_GPIOA, ENABLE);
   RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_GPIOB, ENABLE);
   RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_GPIOD, ENABLE);
@@ -142,13 +162,13 @@ static void gpioInit(void) {
 
   GPIO_InitStructure.GPIO_Mode      = GPIO_Mode_AF_PP;
   GPIO_InitStructure.GPIO_Alternate = GPIO_AF2_TIM1;
-  GPIO_InitStructure.GPIO_Current   = GPIO_DC_12mA; // Full power for as fast transition as possible
+  GPIO_InitStructure.GPIO_Slew_Rate = GPIO_Slew_Rate_High;
   GPIO_InitStructure.Pin            = PWR_OUT_Pin;
   GPIO_InitPeripheral(PWR_OUT_Port, &GPIO_InitStructure);
 
   // Misc outputs
   GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_Out_PP; // temporary to not mess with HW
-  GPIO_InitStructure.GPIO_Current = GPIO_DC_2mA;
+  GPIO_InitStructure.GPIO_Current = GPIO_DC_12mA;
   GPIO_InitStructure.GPIO_Pull    = GPIO_No_Pull;
 
   GPIO_InitStructure.Pin = USB_CTL_Pin;
@@ -156,27 +176,28 @@ static void gpioInit(void) {
   GPIO_InitStructure.Pin = CH224_CFG2_Pin | CH224_CFG3_Pin;
   GPIO_InitPeripheral(CH224_CFG_Port, &GPIO_InitStructure);
 
+  GPIO_InitStructure.Pin = LED1_Pin | LED2_Pin;
+
 #ifdef SWD_ENABLE
   GPIO_InitStructure.GPIO_Mode      = GPIO_Mode_AF_PP;
   GPIO_InitStructure.GPIO_Alternate = GPIO_AF0_SW_JTAG;
-  GPIO_InitStructure.GPIO_Pull      = GPIO_Pull_Up;
-#endif
-  GPIO_InitStructure.Pin = LED1_Pin | LED2_Pin;
   GPIO_InitPeripheral(LED_Port, &GPIO_InitStructure);
+#else
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_InitPeripheral(LED_Port, &GPIO_InitStructure);
+  GPIO_ResetBits(LED_Port, LED1_Pin | LED2_Pin); // Enable button LEDs
+#endif
 
   // Temporary manual configs
   GPIO_ResetBits(USB_CTL_Port, USB_CTL_Pin); // Route USB to CH224 and request 20V
-  GPIO_SetBits(CH224_CFG_Port, CH224_CFG2_Pin);
   GPIO_ResetBits(CH224_CFG_Port, CH224_CFG3_Pin);
+  GPIO_ResetBits(CH224_CFG_Port, CH224_CFG2_Pin); // Too fast, unable to renegotiate
 
   GPIO_ResetBits(BUZZ_Port, BUZZ_Pin);
-  GPIO_ResetBits(LCD_BL_Port, LCD_BL_Pin); // Enable backlight
-
-  GPIO_ResetBits(LED_Port, LED1_Pin | LED2_Pin); // Enable button LEDs
+  GPIO_SetBits(LCD_BL_Port, LCD_BL_Pin); // Disable backlight
 }
 
 static void adcInit(void) {
-  RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_AFIO, ENABLE);        // Enable Analog Frontend
   RCC_EnableAHBPeriphClk(RCC_AHB_PERIPH_ADC, ENABLE);           // Enable HCLK
   ADC_ConfigClk(ADC_CTRL3_CKMOD_PLL, RCC_ADCPLLCLK_DIV8);       // ADC_CLK set to 8MHz
   RCC_ConfigAdc1mClk(RCC_ADC1MCLK_SRC_HSI, RCC_ADC1MCLK_DIV16); // ADC_1MCLK must run at 1MHz
@@ -326,6 +347,7 @@ static void tim2Init(void) {
   // Enable interrupts and start the timer
   NVIC_SetPriority(TIM2_IRQn, 15);
   NVIC_EnableIRQ(TIM2_IRQn);
+
   TIM_Enable(TIM2, ENABLE);
 }
 
@@ -333,6 +355,7 @@ void hwInit(void) {
   iwdgInit();
   nvicInit();
   clockInit();
+  systickInit();
 
   gpioInit();
   spiInit();
@@ -340,7 +363,6 @@ void hwInit(void) {
   dmaInit();
   adcInit();
 
-  systickInit();
   tim1Init();
   tim2Init();
 
