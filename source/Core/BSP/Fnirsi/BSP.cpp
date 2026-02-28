@@ -113,9 +113,8 @@ void resetWatchdog() { IWDG_ReloadKey(); }
 void reboot() { NVIC_SystemReset(); }
 
 void delay_ms(uint16_t count) {
-  volatile uint32_t i = count * 4000; // TODO: meh
-  while (i--) {
-    __NOP();
+  // TODO: provide better delay
+  for (volatile uint32_t i = 0; i < count * 6000; i++) {
   }
 }
 
