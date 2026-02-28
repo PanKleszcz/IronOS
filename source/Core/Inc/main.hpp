@@ -36,7 +36,7 @@ enum class AccelType {
   GPIO      = 7,
   LIS_CLONE = 8,
 };
-extern AccelType DetectedAccelerometerVersion;
+extern volatile AccelType DetectedAccelerometerVersion;
 
 #endif
 #endif /* __MAIN_H */
