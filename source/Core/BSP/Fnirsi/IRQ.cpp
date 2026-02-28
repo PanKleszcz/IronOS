@@ -18,8 +18,7 @@
 // Systick is used by FreeRTOS tick
 void SysTick_Handler(void) { osSystickHandler(); }
 
-volatile uint8_t measureOverrun;
-void             ADC_IRQHandler(void) {
+void ADC_IRQHandler(void) {
   if (SET == ADC_GetIntStatus(ADC, ADC_INT_JENDC)) {
     ADC_ClearIntPendingBit(ADC, ADC_INT_JENDC);
 
@@ -34,7 +33,8 @@ void             ADC_IRQHandler(void) {
 
 extern uint16_t PWMSafetyTimer;
 extern uint8_t  pendingPWM;
-void            TIM2_IRQHandler(void) {
+
+void TIM2_IRQHandler(void) {
   // Corresponds to ST PeriodElapsed
   if (SET == TIM_GetIntStatus(TIM2, TIM_INT_UPDATE)) {
     TIM_ClrIntPendingBit(TIM2, TIM_INT_UPDATE);
@@ -49,7 +49,9 @@ void            TIM2_IRQHandler(void) {
     if (PWMSafetyTimer == 0) {
       TIM1->CCDAT1 = 0;
     } else {
-      TIM1->CCDAT1 = pendingPWM / 4; // todo
+      if (pendingPWM <= 80) { // TODO: this limits power to 100W. Should not be needed
+        TIM1->CCDAT1 = pendingPWM;
+      }
       return;
     }
   }
@@ -61,6 +63,7 @@ void            TIM2_IRQHandler(void) {
     return;
   }
 
-  for (;;) {
-  }
+  // for (;;) {
+  // }
+  TIM2->STS |= TIM2->STS; // Should be unreachable, but for some reasons channels 2-4 fire interrupts
 }

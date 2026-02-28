@@ -265,8 +265,8 @@ static void tim1Init(void) {
 
   timBaseInitStruct.CntMode   = TIM_CNT_MODE_UP;
   timBaseInitStruct.RepetCnt  = 0;
-  timBaseInitStruct.Prescaler = 24; // 64MHz / (24+1) -> 2.56MHz tick
-  timBaseInitStruct.Period    = 63; // 256kHz / (63+1) -> 40kHz
+  timBaseInitStruct.Prescaler = 24;  // 64MHz / (24+1) -> 2.56MHz tick
+  timBaseInitStruct.Period    = 127; // 2560kHz / (127+1) -> 20kHz
 
   TIM_InitTimeBase(TIM1, &timBaseInitStruct);
 
@@ -343,5 +343,6 @@ void hwInit(void) {
   systickInit();
   tim1Init();
   tim2Init();
-  // FRToSSPI::init();
+
+  GPIO_ResetBits(LCD_BL_Port, LCD_BL_Pin); // Enable backlight, TODO: this should be done in Display::setBrightness
 }

@@ -21,9 +21,9 @@ volatile uint8_t  pendingPWM     = 0;
 
 // Our main PWM timer runs at 20Hz, 400 ticks per cycle (8kHz tick)
 // ADC runs at 8MHz and needs less than one timer tick to perform all conversions
-const uint16_t        powerPWM         = 390;
-static const uint16_t holdoffTicks     = 9;
-static const uint16_t tempMeasureTicks = 1;
+const uint16_t        powerPWM         = 395;                                        // pulse when TIM1 output power is enabled
+static const uint16_t holdoffTicks     = 4;                                          // holdoff after TIM1 power pulse
+static const uint16_t tempMeasureTicks = 1;                                          // measurement period
 uint16_t              totalPWM         = powerPWM + tempMeasureTicks + holdoffTicks; // TIM2 init period, the full PWM cycle
 
 uint16_t ADCReadings[ADC_SAMPLES]; // Used to store the adc readings for the handle cold junction temp
@@ -100,7 +100,8 @@ static void switchToFastPWM(void) {
 void setTipPWM(const uint8_t pulse, const bool shouldUseFastModePWM) {
   PWMSafetyTimer = 20; // This is decremented in the handler for PWM so that the tip pwm is
                        // disabled if the PID task is not scheduled often enough.
-  pendingPWM = pulse;
+
+  pendingPWM = pulse * TIM1->AR / TIM2->CCDAT4; // We need to scale pulse from powerPWM to TIM1 period (394 -> 127)
 }
 
 uint8_t getButtonA() { return GPIO_ReadInputDataBit(BUTTON_Port, BUTTON_DOWN_Pin) == Bit_RESET ? 1 : 0; }

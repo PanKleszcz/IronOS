@@ -5,8 +5,7 @@
  *      Author: Ralim, MrTick
  */
 
-#ifndef BSP_MINIWARE_IRQ_H_
-#define BSP_MINIWARE_IRQ_H_
+#pragma once
 
 #include "BSP.h"
 #include "Setup.h"
@@ -26,4 +25,3 @@ void SysTick_Handler(void);
 #ifdef __cplusplus
 }
 #endif
-#endif /* BSP_MINIWARE_IRQ_H_ */
