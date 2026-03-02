@@ -118,7 +118,7 @@ void LCD::initialize() {
 
   // Erase background
   setDrawingWindow(0, 0, 160, 80);
-  FRToSSPI::sendByteMutiple(0x80, 2 * 160 * 80);
+  FRToSSPI::sendByteMutiple(0x00, 2 * 160 * 80);
 
   // Draw a nice frame for the emulated OLED display
   setDrawingWindow(12, 20, 136, 40);
