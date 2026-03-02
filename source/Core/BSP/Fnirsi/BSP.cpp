@@ -241,8 +241,6 @@ uint8_t getTipResistanceX10() {
   return TIP_RESISTANCE; // Auto mode
 }
 
-uint32_t getHwMaxWattage() { return HARDWARE_MAX_WATTAGE_X10; }
-
 bool isTipShorted() {
   // TODO: IMPLEMENT
   return false;

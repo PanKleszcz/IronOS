@@ -33,5 +33,3 @@ bool getIsPoweredByDCIN() {
   return true;
 #endif
 }
-
-uint32_t getHwMaxWattage() { return HARDWARE_MAX_WATTAGE_X10; }

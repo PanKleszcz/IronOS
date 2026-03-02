@@ -53,10 +53,6 @@ uint32_t availableW10(uint8_t sample) {
   availableWattsX10 = availableWattsX10 * powerPWM;
   availableWattsX10 /= totalPWM;
 
-  // cap the calculations to HARDWARE_MAX_WATTAGE_X10
-  if (availableWattsX10 > getHwMaxWattage())
-    availableWattsX10 = getHwMaxWattage();
-
   // availableMilliWattsX10 is now an accurate representation
   return availableWattsX10;
 }

@@ -154,7 +154,7 @@
 #define OP_AMP_GAIN_STAGE  57
 #define USB_PD_VMAX        20 // Maximum voltage for PD to negotiate
 
-#define HARDWARE_MAX_WATTAGE_X10 1000 // Device should never use more power
+#define HARDWARE_MAX_WATTAGE_X10 700    // (NOT USED)
 
 // #define I2C_SOFT_BUS_1 0
 // #define OLED_I2CBB1    0
