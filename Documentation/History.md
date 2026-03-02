@@ -1,5 +1,10 @@
 # Version Changes
 
+## v0.03
+
+ - Fnirsi HS-02A release
+ - Fix power limiting implementation
+
 ## v0.02
 
  - Fnirsi HS-02A release
