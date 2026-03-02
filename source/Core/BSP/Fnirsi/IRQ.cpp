@@ -49,9 +49,7 @@ void TIM2_IRQHandler(void) {
     if (PWMSafetyTimer == 0) {
       TIM1->CCDAT1 = 0;
     } else {
-      if (pendingPWM <= 80) { // TODO: this limits power to 100W. Should not be needed
-        TIM1->CCDAT1 = pendingPWM;
-      }
+      TIM1->CCDAT1 = pendingPWM;
       return;
     }
   }

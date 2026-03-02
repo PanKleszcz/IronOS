@@ -148,13 +148,14 @@
 
 #define VOLTAGE_DIV        540 // 540 - Default divider from schematic
 #define CALIBRATION_OFFSET 900 // 900 - Default adc offset in uV
-#define POWER_LIMIT        60  // 0 watts default limit
+#define POWER_LIMIT        60  // 60 watts default limit
+
+#define USB_PD_VMAX        20 // Maximum voltage for PD to negotiate
 #define MAX_POWER_LIMIT    100
 #define POWER_LIMIT_STEPS  5
 #define OP_AMP_GAIN_STAGE  57
-#define USB_PD_VMAX        20 // Maximum voltage for PD to negotiate
 
-#define HARDWARE_MAX_WATTAGE_X10 700    // (NOT USED)
+#define HARDWARE_MAX_WATTAGE_X10 1000    // 100W
 
 // #define I2C_SOFT_BUS_1 0
 // #define OLED_I2CBB1    0
@@ -163,16 +164,13 @@
 #define NO_ACCEL // temporary
 
 // Let's use PID because why not.
-#define TIP_CONTROL_PID               // We use PID rather than integrator
-#define TIP_PID_KP                20 // Reasonable compromise for most tips so far
-#define TIP_PID_KI                 6 // About as high for stability across tips
-#define TIP_PID_KD               8000 // Helps dampen smaller tips; ~= nothing for larger tips
-#define TIP_THERMAL_MASS        0 // Not used for PID
-#define TIP_THERMAL_INERTIA     0 // Not used for PID
-#define TIP_RESISTANCE          25 // C245 is around 2.5R
-
-// #define SLEW_LIMIT             10 // Limit to 3.0 Watts per 50ms pid loop update rate slew rate (60W/s)
-
+#define TIP_CONTROL_PID              // We use PID rather than integrator
+#define TIP_PID_KP              20   // Good compromise between overshoot and reaction speed
+#define TIP_PID_KI              6    //
+#define TIP_PID_KD              8000 // C245 has a surprisingly high inertia, needs lot of dampening
+#define TIP_THERMAL_MASS        0    // Not used for PID
+#define TIP_THERMAL_INERTIA     0    // Not used for PID
+#define TIP_RESISTANCE          25   // C245 is around 2.5R
 
 #define FLASH_LOGOADDR      (0x08000000 + (122 * 1024)) // 2KB up to address 0x0801F000 (124 * 1024)
 #define SETTINGS_START_PAGE (0x08000000 + (120 * 1024))

@@ -191,7 +191,7 @@ static void gpioInit(void) {
   // Temporary manual configs
   GPIO_ResetBits(USB_CTL_Port, USB_CTL_Pin); // Route USB to CH224 and request 20V
   GPIO_ResetBits(CH224_CFG_Port, CH224_CFG3_Pin);
-  GPIO_ResetBits(CH224_CFG_Port, CH224_CFG2_Pin); // Too fast, unable to renegotiate
+  GPIO_SetBits(CH224_CFG_Port, CH224_CFG2_Pin);
 
   GPIO_ResetBits(BUZZ_Port, BUZZ_Pin);
   GPIO_SetBits(LCD_BL_Port, LCD_BL_Pin); // Disable backlight

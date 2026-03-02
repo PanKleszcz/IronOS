@@ -300,6 +300,9 @@ int32_t getX10WattageLimits() {
   if (powerSupplyWattageLimit && limit > powerSupplyWattageLimit * 10) {
     limit = powerSupplyWattageLimit * 10;
   }
+  if (HARDWARE_MAX_WATTAGE_X10 && limit > HARDWARE_MAX_WATTAGE_X10) {
+    limit = HARDWARE_MAX_WATTAGE_X10;
+  }
   return limit;
 }
 
