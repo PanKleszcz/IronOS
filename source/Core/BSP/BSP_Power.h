@@ -26,6 +26,8 @@ uint16_t getTipInertia();
 
 TemperatureType_t getCustomTipMaxInC();
 
+uint32_t getHwMaxWattage();
+
 #ifdef __cplusplus
 }
 #endif

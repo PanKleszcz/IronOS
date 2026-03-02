@@ -20,3 +20,5 @@ bool getIsPoweredByDCIN() { return false; }
 
 uint8_t getTipResistanceX10() { return TIP_RESISTANCE; }
 bool    isTipShorted() { return false; }
+
+uint32_t getHwMaxWattage() { return HARDWARE_MAX_WATTAGE_X10; }
