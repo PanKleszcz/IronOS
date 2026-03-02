@@ -1,8 +1,14 @@
 # Version Changes
 
+## v0.02
+
+ - Fnirsi HS-02A release
+ - Optimize temperature control parameters
+ - Fix display SPI issues
+
 ## v0.01
 
- - Fnirsi HS-02 release
+ - Initial Fnirsi HS-02 release
 
 ## v2.23
 
