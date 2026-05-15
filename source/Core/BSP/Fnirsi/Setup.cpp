@@ -119,6 +119,24 @@ static void spiInit(void) {
   SPI_Enable(SPI1, ENABLE);
 }
 
+static void i2cInit(void) {
+#ifdef I2C_SOFT_BUS_1
+  // Init I2C GPIO
+  GPIO_InitType GPIO_InitStructure;
+  GPIO_InitStruct(&GPIO_InitStructure);
+
+  RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_AFIO, ENABLE);
+  RCC_EnableAPB2PeriphClk(RCC_APB2_PERIPH_GPIOA, ENABLE);
+
+  GPIO_InitStructure.Pin            = I2C_SCL_Pin | I2C_SDA_Pin;
+  GPIO_InitStructure.GPIO_Current   = GPIO_DC_12mA;
+  GPIO_InitStructure.GPIO_Slew_Rate = GPIO_Slew_Rate_High;
+  GPIO_InitStructure.GPIO_Pull      = GPIO_Pull_Up;
+  GPIO_InitStructure.GPIO_Mode      = GPIO_Mode_Out_OD;
+  GPIO_InitPeripheral(I2C_Port, &GPIO_InitStructure);
+#endif
+}
+
 static void gpioInit(void) {
 
   GPIO_DeInit(GPIOA);
@@ -359,6 +377,7 @@ void hwInit(void) {
 
   gpioInit();
   spiInit();
+  i2cInit();
 
   dmaInit();
   adcInit();
