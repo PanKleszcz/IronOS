@@ -21,7 +21,7 @@ void                startPOWTask(void const *argument);
 extern TaskHandle_t pidTaskNotification;
 extern int32_t      powerSupplyWattageLimit;
 extern uint8_t      accelInit;
-extern TickType_t   lastMovementTime;
+extern volatile TickType_t   lastMovementTime;
 #ifdef __cplusplus
 }
 // Accelerometer type
@@ -35,6 +35,7 @@ enum class AccelType {
   SC7       = 6,
   GPIO      = 7,
   LIS_CLONE = 8,
+  KXTJ3     = 9,
 };
 extern volatile AccelType DetectedAccelerometerVersion;
 

@@ -34,6 +34,10 @@
 #define ADC_CURR_Pin              GPIO_PIN_1
 #define ADC_CURR_Port             GPIOB
 
+#define I2C_SCL_Pin               GPIO_PIN_9
+#define I2C_SDA_Pin               GPIO_PIN_10
+#define I2C_Port                  GPIOA
+
 #define ADC_TEMP_Channel          ADC_CH_2_PA1
 #define ADC_3V3_Channel           ADC_CH_3_PA2
 #define ADC_VBUS_Channel          ADC_CH_9_PB0

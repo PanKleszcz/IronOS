@@ -128,11 +128,9 @@
 // #error "Multiple models defined!"
 // #endif
 
-// #define ACCEL_MMA
-// #define ACCEL_LIS
-// #define ACCEL_SC7
-// #define ACCEL_MSA
-// #define ACCEL_BMA
+#define I2C_SOFT_BUS_1
+#define ACCEL_I2CBB1
+#define ACCEL_KXTJ3
 
 #define MIN_CALIBRATION_OFFSET 100 // Min value for calibration
 #define SOLDERING_TEMP         320 // Default soldering temp is 320.0 °C
@@ -157,11 +155,8 @@
 
 #define HARDWARE_MAX_WATTAGE_X10 1000    // 100W
 
-// #define I2C_SOFT_BUS_1 0
 // #define OLED_I2CBB1    0
-// #define ACCEL_I2CBB1   0
 // #define TIPTYPE_T12    0 // Can manually pick a T12 tip
-#define NO_ACCEL // temporary
 
 // Let's use PID because why not.
 #define TIP_CONTROL_PID              // We use PID rather than integrator

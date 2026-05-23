@@ -6,7 +6,7 @@
  */
 
 #include "BSP.h"
-// #include "I2CBB1.hpp"
+#include "I2CBB1.hpp"
 // #include "I2CBB2.hpp"
 // #include "Pins.h"
 #include "Setup.h"
@@ -29,4 +29,9 @@ void preRToSInit() {
 
   FRToSSPI::FRToSInit();
   FRToSSPI::sendLcdReset();
+
+#ifdef I2C_SOFT_BUS_1
+  I2CBB1::init();
+#endif
+
 }
