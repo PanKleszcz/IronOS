@@ -24,7 +24,7 @@
 
 static TickType_t          powerPulseWaitUnit          = 25 * TICKS_100MS;      // 2.5 s
 static TickType_t          powerPulseDurationUnit      = (5 * TICKS_100MS) / 2; // 250 ms
-TaskHandle_t               pidTaskNotification         = NULL;
+volatile TaskHandle_t      pidTaskNotification         = NULL;
 volatile TemperatureType_t currentTempTargetDegC       = 0; // Current temperature target in C
 int32_t                    powerSupplyWattageLimit     = 0;
 uint8_t                    heaterThermalRunawayCounter = 0;
