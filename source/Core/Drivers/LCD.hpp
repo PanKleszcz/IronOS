@@ -80,10 +80,13 @@ public:
 
 private:
   static bool checkDisplayBufferChecksum() {
-    uint32_t  hash = 0;
-    const int len  = sizeof(screenBuffer);
-    for (int i = 0; i < len; i++) {
-      hash += (i * screenBuffer[i]);
+static_assert(sizeof(screenBuffer) % 4 == 0, "screenBuffer size must be multiple of 4");
+    uint32_t hash = 0;
+    uint32_t len = sizeof(screenBuffer)/4;
+    uint32_t *pBuffer = (uint32_t*)screenBuffer;
+    while (len > 0) {
+      hash += (len * (*pBuffer++));
+len--;
     }
 
     bool result     = hash != displayChecksum;
