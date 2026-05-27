@@ -255,7 +255,10 @@ void LCD::setBrightness(uint8_t brightness) {
 }
 
 void LCD::setInverse(bool inverse) {
-  // TODO implement
+  const FRToSSPI::SPI_CMD cmdInvSet = {
+    (uint8_t)(inverse ? ST7735_INVON : ST7735_INVOFF), FRToSSPI::SPI_CMD_PAYLOAD, 0, NULL
+  };
+  FRToSSPI::sendCmdChain(&cmdInvSet, 1);
 }
 
 void LCD::flushSecondBuffer(void) { memcpy(screenBuffer, secondFrameBuffer, sizeof(screenBuffer)); }
