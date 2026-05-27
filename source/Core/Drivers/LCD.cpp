@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "LCD_Port.hpp"
 
 // rendering to the buffer
 uint8_t *LCD::stripPointers[4]; // Pointers to the strips to allow for buffer having extra content
@@ -251,7 +252,7 @@ void LCD::setRotation(bool leftHanded) {
 }
 
 void LCD::setBrightness(uint8_t brightness) {
-  // TODO implement
+  LCDSetBacklight(brightness);
 }
 
 void LCD::setInverse(bool inverse) {
