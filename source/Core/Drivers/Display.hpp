@@ -36,9 +36,8 @@ extern "C" {
 #elif defined(LCD_160x80)
 #include "LCD.hpp"
 #define DISPLAY_CLASS LCD
-// Until proper LCD UI is implemented we emulate 128x32 OLED in the middle of the screen
-#define DISPLAY_WIDTH (128)
-#define DISPLAY_HEIGHT (32)
+#define DISPLAY_WIDTH (160)
+#define DISPLAY_HEIGHT (80)
 #else
 #error NO DISPLAY DEFINED
 #endif

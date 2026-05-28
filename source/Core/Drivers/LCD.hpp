@@ -1,10 +1,10 @@
 /*
- * OLED.hpp
+ * LCD.hpp
  *
- *  Created on: 20Jan.,2017
- *      Author: Ben V. Brown <Ralim>, MrTick
- *      Designed for the SSD1307
- *      Cleared for release for TS100 2017/08/20
+ *  Created on: 27May.,2026
+ *      Author: Ben V. Brown <Ralim>
+ *      Modified: MrTick, OK2CM
+ *      Target ST7735, Fnirsi HS02
  */
 
 #pragma once
@@ -19,10 +19,10 @@
 #include <SPI_Wrapper.hpp>
 #define SPI_CLASS FRToSSPI
 
-// TODO: use whole size of the display
-#define LCD_WIDTH           128
-#define LCD_HEIGHT          32
+#define LCD_WIDTH           160
+#define LCD_HEIGHT          80
 
+#define LCD_SCREEN_BUF_SIZE ((LCD_WIDTH * LCD_HEIGHT)/8)
 
 #define ST7735_XOFFSET 1
 #define ST7735_YOFFSET 26
@@ -38,15 +38,10 @@ public:
       const int len = (LCD_WIDTH * (LCD_HEIGHT / 8));
 
       // TODO: don't use strip buffers
-      setDrawingWindow(16, 24, LCD_WIDTH, 8);
-      SPI_CLASS::sendPixels(stripPointers[0], len/4);
-      setDrawingWindow(16, 32, LCD_WIDTH, 8);
-      SPI_CLASS::sendPixels(stripPointers[1], len/4);
-      setDrawingWindow(16, 40, LCD_WIDTH, 8);
-      SPI_CLASS::sendPixels(stripPointers[2], len/4);
-      setDrawingWindow(16, 48, LCD_WIDTH, 8);
-      SPI_CLASS::sendPixels(stripPointers[3], len/4);
-
+      for (uint8_t i = 0; i < LCD_HEIGHT/8; i++) {
+        setDrawingWindow(0, 8*i, LCD_WIDTH, 8);
+        SPI_CLASS::sendPixels(stripPointers[i], len/(LCD_HEIGHT/8));
+      }
     }
   }
 
@@ -80,13 +75,13 @@ public:
 
 private:
   static bool checkDisplayBufferChecksum() {
-static_assert(sizeof(screenBuffer) % 4 == 0, "screenBuffer size must be multiple of 4");
+    static_assert(sizeof(screenBuffer) % 4 == 0, "screenBuffer size must be multiple of 4");
     uint32_t hash = 0;
     uint32_t len = sizeof(screenBuffer)/4;
     uint32_t *pBuffer = (uint32_t*)screenBuffer;
     while (len > 0) {
       hash += (len * (*pBuffer++));
-len--;
+      len--;
     }
 
     bool result     = hash != displayChecksum;
@@ -96,10 +91,10 @@ len--;
   static void         drawChar(uint16_t charCode, FontStyle fontStyle, const uint8_t soft_x_limit); // Draw a character to the current cursor location
   static void         setDrawingWindow(uint8_t x, uint8_t y, uint8_t w, uint8_t h);
 
-  static uint8_t     *stripPointers[4]; // Pointers to the strips to allow for buffer having extra content
+  static uint8_t     *stripPointers[LCD_HEIGHT / 8]; // Pointers to the strips to allow for buffer having extra content
   static uint32_t     displayChecksum;
-  static uint8_t      screenBuffer[LCD_WIDTH * (LCD_HEIGHT / 8)]; // The data buffer
-  static uint8_t      secondFrameBuffer[LCD_WIDTH * (LCD_HEIGHT / 8)];
+  static uint8_t      screenBuffer[LCD_SCREEN_BUF_SIZE]; // The data buffer
+  static uint8_t      secondFrameBuffer[LCD_SCREEN_BUF_SIZE];
   static uint8_t      loopCounter;
 };
 
