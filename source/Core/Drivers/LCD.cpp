@@ -50,6 +50,11 @@ uint32_t LCD::displayChecksum;
 #define ST7735_GMCTRP1 0xE0
 #define ST7735_GMCTRN1 0xE1
 
+// LCD rotation
+const FRToSSPI::SPI_CMD lcdInitCmdRotR = {ST7735_MADCTL, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0x88}};
+const FRToSSPI::SPI_CMD lcdInitCmdRotL = {ST7735_MADCTL, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0x48}};
+
+// LCD initialization
 const FRToSSPI::SPI_CMD lcdInitCmds[] = {
     {ST7735_SWRESET, FRToSSPI::SPI_CMD_DELAY_MS, 150,                                                                                                        NULL},
     { ST7735_SLPOUT, FRToSSPI::SPI_CMD_DELAY_MS, 200,                                                                                                        NULL},
@@ -70,7 +75,7 @@ const FRToSSPI::SPI_CMD lcdInitCmds[] = {
     { ST7735_INVCTR,  FRToSSPI::SPI_CMD_PAYLOAD,   1,                                                                                           (uint8_t[]){0x03}},
     {  ST7735_INVON,  FRToSSPI::SPI_CMD_PAYLOAD,   0,                                                                                                        NULL},
     { ST7735_VMCTR1,  FRToSSPI::SPI_CMD_PAYLOAD,   1,                                                                                           (uint8_t[]){0x0E}},
-    { ST7735_MADCTL,  FRToSSPI::SPI_CMD_PAYLOAD,   1,                                                                                           (uint8_t[]){0x88}},
+    lcdInitCmdRotR,
     { ST7735_COLMOD,  FRToSSPI::SPI_CMD_PAYLOAD,   1,                                                                                           (uint8_t[]){0x05}},
 
     {  ST7735_NORON, FRToSSPI::SPI_CMD_DELAY_MS,  10,                                                                                                        NULL},
@@ -248,7 +253,11 @@ bool LCD::scrollUp(uint8_t pos) {
 }
 
 void LCD::setRotation(bool leftHanded) {
-  // TODO implement
+  if (leftHanded) {
+    FRToSSPI::sendCmdChain(&lcdInitCmdRotL, 1);
+  } else {
+    FRToSSPI::sendCmdChain(&lcdInitCmdRotR, 1);
+  }
 }
 
 void LCD::setBrightness(uint8_t brightness) {
