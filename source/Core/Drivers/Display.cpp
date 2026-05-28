@@ -181,8 +181,8 @@ void Display::transitionScrollDown(const TickType_t viewEnterTime) {
     }
     if (needsRefresh) {
       DISPLAY_CLASS::refresh();
+      vTaskDelayUntil(&startDraw, TICKS_100MS / 7);
     }
-    vTaskDelayUntil(&startDraw, TICKS_100MS / 7);
   }
 }
 /**
@@ -207,8 +207,8 @@ void Display::transitionScrollUp(const TickType_t viewEnterTime) {
     }
     if (needsRefresh) {
       DISPLAY_CLASS::refresh();
+      vTaskDelayUntil(&startDraw, TICKS_100MS / 7);
     }
-    vTaskDelayUntil(&startDraw, TICKS_100MS / 7);
   }
 }
 
