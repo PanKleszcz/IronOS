@@ -39,7 +39,7 @@ public:
 
       // TODO: don't use strip buffers
       for (uint8_t i = 0; i < LCD_HEIGHT/8; i++) {
-        setDrawingWindow(2, 8*i, LCD_WIDTH, 8);
+        setDrawingWindow(0, 8*i, LCD_WIDTH, 8);
         SPI_CLASS::sendPixels(stripPointers[i], len/(LCD_HEIGHT/8));
       }
     }
