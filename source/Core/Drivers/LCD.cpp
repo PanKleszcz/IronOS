@@ -283,6 +283,7 @@ void LCD::setRotation(bool leftHanded) {
   } else {
     FRToSSPI::sendCmdChain(&lcdInitCmdRotR, 1);
   }
+  refresh(true);
 }
 
 void LCD::setBrightness(uint8_t brightness) {

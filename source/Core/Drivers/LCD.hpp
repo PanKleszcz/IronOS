@@ -32,14 +32,14 @@ public:
 
   static void initialize(); // Startup the I2C coms (brings screen out of reset etc)
   // Draw the buffer out to the LCD if any content has changed.
-  static void refresh() {
+  static void refresh(const bool force = false) {
 
-    if (checkDisplayBufferChecksum()) {
+    if (force || checkDisplayBufferChecksum()) {
       const int len = (LCD_WIDTH * (LCD_HEIGHT / 8));
 
       // TODO: don't use strip buffers
       for (uint8_t i = 0; i < LCD_HEIGHT/8; i++) {
-        setDrawingWindow(0, 8*i, LCD_WIDTH, 8);
+        setDrawingWindow(2, 8*i, LCD_WIDTH, 8);
         SPI_CLASS::sendPixels(stripPointers[i], len/(LCD_HEIGHT/8));
       }
     }
