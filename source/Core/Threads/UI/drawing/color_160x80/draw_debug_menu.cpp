@@ -11,7 +11,7 @@ extern osThreadId PIDTaskHandle;
 void ui_draw_debug_menu(const uint8_t item_number) {
   Display::setCursor(0, 0);                                   // Position the cursor at the 0,0 (top left)
   Display::print(SmallSymbolVersionNumber, FontStyle::SMALL); // Print version number
-  Display::setCursor(0, 8);                                   // second line
+  Display::setCursor(0, 24);                                  // second line
   Display::print(DebugMenu[item_number], FontStyle::SMALL);
   switch (item_number) {
   case 0: // Build Date
@@ -25,9 +25,10 @@ void ui_draw_debug_menu(const uint8_t item_number) {
     Display::setCursor(0, 0); // Position the cursor at the 0,0 (top left)
     Display::print(DebugMenu[item_number], FontStyle::SMALL);
     Display::drawHex(getDeviceValidation(), FontStyle::SMALL, 8);
-    Display::setCursor(0, 8); // second line
+    Display::setCursor(0, 16); // second line
 #endif
     Display::drawHex((uint32_t)(id >> 32), FontStyle::SMALL, 8);
+    Display::setCursor(36, 40);
     Display::drawHex((uint32_t)(id & 0xFFFFFFFF), FontStyle::SMALL, 8);
   } break;
   case 2: // ACC Type

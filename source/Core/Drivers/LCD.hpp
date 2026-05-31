@@ -57,13 +57,11 @@ public:
 
   // Clears the buffer
   static void clearScreen() { memset(stripPointers[0], 0, LCD_WIDTH * (LCD_HEIGHT / 8)); }
-  inline static void drawUnavailableIcon() { drawArea(LCD_WIDTH - LCD_HEIGHT - 2, 0, LCD_HEIGHT, LCD_HEIGHT, UnavailableIcon); }
 
   static void drawArea(int16_t x, int8_t y, uint8_t wide, uint8_t height, const uint8_t *ptr);        // Draw an area, but y must be aligned on 0/8 offset
   static void drawAreaSwapped(int16_t x, int8_t y, uint8_t wide, uint8_t height, const uint8_t *ptr); // Draw an area, but y must be aligned on 0/8 offset
   static void fillArea(int16_t x, int8_t y, uint8_t wide, uint8_t height, const uint8_t value);       // Fill an area, but y must be aligned on 0/8 offset
   static void drawFilledRect(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, bool clear);
-  static void drawHeatSymbol(uint8_t state);
 
   static void flushSecondBuffer(void);
   static void useSecondaryFramebuffer(bool useSecondary);

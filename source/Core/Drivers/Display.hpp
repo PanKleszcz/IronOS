@@ -42,6 +42,18 @@ extern "C" {
 #error NO DISPLAY DEFINED
 #endif
 
+#if defined(LCD_160x80)
+#define FONT_SMALL_HEIGHT   (16)
+#define FONT_SMALL_WIDTH    (12)
+#define FONT_LARGE_HEIGHT   (32)
+#define FONT_LARGE_WIDTH    (24)
+#else
+#define FONT_SMALL_HEIGHT   (8)
+#define FONT_SMALL_WIDTH    (6)
+#define FONT_LARGE_HEIGHT   (16)
+#define FONT_LARGE_WIDTH    (12)
+#endif
+
 class Display {
 public:
   enum DisplayState : bool { OFF = false, ON = true };
@@ -91,7 +103,7 @@ public:
   static void drawBattery(uint8_t state) { drawSymbol(3 + (state > 10 ? 10 : state)); }
   // Draws a checkbox
   static void drawCheckbox(bool state) { drawSymbol((state) ? 16 : 17); }
-  inline static void drawUnavailableIcon() { DISPLAY_CLASS::drawArea(DISPLAY_WIDTH - DISPLAY_HEIGHT - 2, 0, DISPLAY_HEIGHT, DISPLAY_HEIGHT, UnavailableIcon); }
+  inline static void drawUnavailableIcon() { DISPLAY_CLASS::drawArea(0, 40, 32, 32, UnavailableIcon); }
   static void debugNumber(int32_t val, FontStyle fontStyle);
   static void drawHex(uint32_t x, FontStyle fontStyle, uint8_t digits);
   static void drawSymbol(uint8_t symbolID);                                                           // Used for drawing symbols of a predictable width

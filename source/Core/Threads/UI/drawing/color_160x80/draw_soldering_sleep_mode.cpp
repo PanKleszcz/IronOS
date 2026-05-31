@@ -4,18 +4,16 @@
 void ui_draw_soldering_detailed_sleep(TemperatureType_t tipTemp) {
 
   Display::clearScreen();
-  Display::setCursor(0, 0);
-  Display::print(translatedString(Tr->SleepingAdvancedString), FontStyle::SMALL);
   Display::setCursor(0, 8);
+  Display::print(translatedString(Tr->SleepingAdvancedString), FontStyle::SMALL);
+  Display::setCursor(0, 32);
   Display::print(translatedString(Tr->SleepingTipAdvancedString), FontStyle::SMALL);
   Display::printNumber(tipTemp, 3, FontStyle::SMALL);
-  if (getSettingValue(SettingsOptions::TemperatureInF)) {
-    Display::print(SmallSymbolDegF, FontStyle::SMALL);
-  } else {
-    Display::print(SmallSymbolDegC, FontStyle::SMALL);
-  }
+  Display::printSymbolDeg(FontStyle::SMALL);
 
-  Display::print(SmallSymbolSpace, FontStyle::SMALL);
+  Display::setCursor(0, 48);
+  Display::print(translatedString(Tr->InputVoltageString), FontStyle::SMALL);
+  Display::setCursor(96, 48);
   printVoltage();
   Display::print(SmallSymbolVolts, FontStyle::SMALL);
 
@@ -25,9 +23,9 @@ void ui_draw_soldering_detailed_sleep(TemperatureType_t tipTemp) {
 void ui_draw_soldering_basic_sleep(TemperatureType_t tipTemp) {
 
   Display::clearScreen();
-  Display::setCursor(0, 0);
-
+  Display::setCursor(44, 0);
   Display::print(LargeSymbolSleep, FontStyle::LARGE);
+  Display::setCursor(44, 40);
   Display::printNumber(tipTemp, 3, FontStyle::LARGE);
   Display::printSymbolDeg(FontStyle::EXTRAS);
 
