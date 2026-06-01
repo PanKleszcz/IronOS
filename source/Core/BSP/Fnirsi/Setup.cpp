@@ -300,7 +300,7 @@ static void tim1Init(void) {
   ocInitStruct.OutputState = TIM_OUTPUT_STATE_ENABLE;
 
   TIM_InitOc1(TIM1, &ocInitStruct); // Output PWM
-  TIM_ConfigOc1Fast(TIM2, TIM_OC_FAST_ENABLE);
+  TIM_ConfigOc1Fast(TIM1, TIM_OC_FAST_ENABLE);
 
   TIM_Enable(TIM1, ENABLE);
   TIM_EnableCtrlPwmOutputs(TIM1, ENABLE);
