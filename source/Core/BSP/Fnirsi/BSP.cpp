@@ -133,9 +133,14 @@ bool          isTipDisconnected() {
 void setStatusLED(const enum StatusLED state) {
   // TODO: Add a nice visual feature to LCD
 }
+
 void setBuzzer(bool on) {
-  // TODO: Use channel3 of TIM1 to control brightness
+  // 63 = 50% duty cycle -> too lound and too much current
+  // 20 = 16% duty cycle -> max reasonable
+  static_assert(BUZZER_VOLUME < 20);
+  TIM_SetCmp1(TIM2, on ? BUZZER_VOLUME : 0);
 }
+
 #ifdef TIP_RESISTANCE_SENSE_Pin
 // We want to calculate lastTipResistance
 // If tip is connected, and the tip is cold and the tip is not being heated

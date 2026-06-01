@@ -73,6 +73,12 @@
 #define DEFAULT_BRIGHTNESS 101  // default LCD brightness
 
 /**
+ * Buzzer (annoying)
+ *
+ */
+#define BUZZER_VOLUME 0 // Range: 0 - 20
+
+/**
  * Temp change settings
  */
 #define TEMP_CHANGE_SHORT_STEP     1  // Default temp change short step +1

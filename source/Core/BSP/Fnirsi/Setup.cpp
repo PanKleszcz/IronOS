@@ -155,8 +155,6 @@ static void gpioInit(void) {
   GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_Out_PP; // temporary to not mess with HW
   GPIO_InitStructure.GPIO_Current = GPIO_DC_2mA;
   GPIO_InitStructure.GPIO_Pull    = GPIO_No_Pull;
-  GPIO_InitStructure.Pin          = BUZZ_Pin;
-  GPIO_InitPeripheral(BUZZ_Port, &GPIO_InitStructure);
   GPIO_InitStructure.Pin = LCD_BL_Pin;
   GPIO_InitPeripheral(LCD_BL_Port, &GPIO_InitStructure);
 
@@ -165,6 +163,10 @@ static void gpioInit(void) {
   GPIO_InitStructure.GPIO_Slew_Rate = GPIO_Slew_Rate_High;
   GPIO_InitStructure.Pin            = PWR_OUT_Pin;
   GPIO_InitPeripheral(PWR_OUT_Port, &GPIO_InitStructure);
+
+  GPIO_InitStructure.Pin          = BUZZ_Pin;
+  GPIO_InitStructure.GPIO_Alternate = GPIO_AF5_TIM2;
+  GPIO_InitPeripheral(BUZZ_Port, &GPIO_InitStructure);
 
   // Misc outputs
   GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_Out_PP; // temporary to not mess with HW
@@ -193,7 +195,6 @@ static void gpioInit(void) {
   GPIO_ResetBits(CH224_CFG_Port, CH224_CFG3_Pin);
   GPIO_SetBits(CH224_CFG_Port, CH224_CFG2_Pin);
 
-  GPIO_ResetBits(BUZZ_Port, BUZZ_Pin);
   GPIO_SetBits(LCD_BL_Port, LCD_BL_Pin); // Disable backlight
 }
 
@@ -306,6 +307,35 @@ static void tim1Init(void) {
   TIM_EnableCtrlPwmOutputs(TIM1, ENABLE);
 }
 
+static void tim2Init(void) {
+  // TIM2 is used for buzzer.
+  RCC_EnableAPB1PeriphClk(RCC_APB1_PERIPH_TIM2, ENABLE); // APB1 runs at 16MHz, but timer clock is multiplied to 32MHz
+  TIM_ConfigInternalClk(TIM2);
+
+  TIM_TimeBaseInitType timBaseInitStruct;
+  TIM_InitTimBaseStruct(&timBaseInitStruct);
+
+  timBaseInitStruct.CntMode   = TIM_CNT_MODE_UP;
+  timBaseInitStruct.RepetCnt  = 0;
+  timBaseInitStruct.Prescaler = 249;  // 64MHz / (249+1) -> 256kHz tick
+  timBaseInitStruct.Period    = 127; // 256kHz / (127+1) -> 2kHz
+
+  TIM_InitTimeBase(TIM2, &timBaseInitStruct);
+
+  OCInitType ocInitStruct;
+  TIM_InitOcStruct(&ocInitStruct);
+
+  ocInitStruct.OcMode      = TIM_OCMODE_PWM1;
+  ocInitStruct.Pulse       = 0;
+  ocInitStruct.OcPolarity  = TIM_OC_POLARITY_HIGH;
+  ocInitStruct.OutputState = TIM_OUTPUT_STATE_ENABLE;
+
+  TIM_InitOc1(TIM2, &ocInitStruct);
+  TIM_SetCmp1(TIM2, 0);
+
+  TIM_Enable(TIM2, ENABLE);
+}
+
 static void tim4Init(void) {
   // TIM4 is used for ADC trigger
   RCC_EnableAPB1PeriphClk(RCC_APB1_PERIPH_TIM4, ENABLE); // APB1 runs at 16MHz, but timer clock is multiplied to 32MHz
@@ -365,6 +395,7 @@ void hwInit(void) {
   adcInit();
 
   tim1Init();
+  tim2Init();
   tim4Init();
 
   GPIO_ResetBits(LCD_BL_Port, LCD_BL_Pin); // Enable backlight, TODO: this should be done in Display::setBrightness
