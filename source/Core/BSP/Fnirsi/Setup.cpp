@@ -227,8 +227,8 @@ static void adcInit(void) {
   ADC_ConfigInjectedChannel(ADC, ADC_TEMP_Channel, 3, ADC_SAMP_TIME_239CYCLES5);
   ADC_ConfigInjectedChannel(ADC, ADC_TEMP_Channel, 4, ADC_SAMP_TIME_239CYCLES5);
 
-  // Injected conversions are triggered by TIM2 channel1 OC event
-  ADC_ConfigExternalTrigInjectedConv(ADC, ADC_EXT_TRIG_INJ_CONV_T2_TRGO);
+  // Injected conversions are triggered by TIM4 channel1 OC event
+  ADC_ConfigExternalTrigInjectedConv(ADC, ADC_EXT_TRIG_INJ_CONV_T4_TRGO);
   ADC_EnableExternalTrigInjectedConv(ADC, ENABLE);
 
   // Enable DMA
@@ -300,15 +300,16 @@ static void tim1Init(void) {
   ocInitStruct.OutputState = TIM_OUTPUT_STATE_ENABLE;
 
   TIM_InitOc1(TIM1, &ocInitStruct); // Output PWM
-  TIM_ConfigOc1Fast(TIM2, TIM_OC_FAST_ENABLE);
+  TIM_ConfigOc1Fast(TIM1, TIM_OC_FAST_ENABLE);
 
   TIM_Enable(TIM1, ENABLE);
   TIM_EnableCtrlPwmOutputs(TIM1, ENABLE);
 }
 
-static void tim2Init(void) {
-  RCC_EnableAPB1PeriphClk(RCC_APB1_PERIPH_TIM2, ENABLE); // APB1 runs at 16MHz, but timer clock is multiplied to 32MHz
-  TIM_ConfigInternalClk(TIM2);
+static void tim4Init(void) {
+  // TIM4 is used for ADC trigger
+  RCC_EnableAPB1PeriphClk(RCC_APB1_PERIPH_TIM4, ENABLE); // APB1 runs at 16MHz, but timer clock is multiplied to 32MHz
+  TIM_ConfigInternalClk(TIM4);
 
   TIM_TimeBaseInitType timBaseInitStruct;
   TIM_InitTimBaseStruct(&timBaseInitStruct);
@@ -318,8 +319,8 @@ static void tim2Init(void) {
   timBaseInitStruct.Prescaler = 3999; // 32MHz / (3999+1) -> 8kHz tick
   timBaseInitStruct.Period    = 399;  // 8kHz / (399+1) -> 20Hz
 
-  TIM_InitTimeBase(TIM2, &timBaseInitStruct);
-  TIM_ConfigArPreload(TIM2, ENABLE); // Not really needed as we don't switch between fast/slow PWM
+  TIM_InitTimeBase(TIM4, &timBaseInitStruct);
+  TIM_ConfigArPreload(TIM4, ENABLE); // Not really needed as we don't switch between fast/slow PWM
 
   // Output channel configuration:
   OCInitType ocInitStruct;
@@ -331,24 +332,24 @@ static void tim2Init(void) {
 
   // Channel 1 to trigger ADC"
   ocInitStruct.Pulse = powerPWM + 14;
-  TIM_InitOc1(TIM2, &ocInitStruct);
-  TIM_ConfigOc1Fast(TIM2, TIM_OC_FAST_ENABLE);
+  TIM_InitOc1(TIM4, &ocInitStruct);
+  TIM_ConfigOc1Fast(TIM4, TIM_OC_FAST_ENABLE);
 
   // Channel 2 to stop TIM1 output
   ocInitStruct.Pulse = powerPWM;
-  TIM_InitOc2(TIM2, &ocInitStruct);
-  TIM_ConfigOc2Fast(TIM2, TIM_OC_FAST_ENABLE);
+  TIM_InitOc2(TIM4, &ocInitStruct);
+  TIM_ConfigOc2Fast(TIM4, TIM_OC_FAST_ENABLE);
 
   // Output events configuration:
-  TIM_SelectOutputTrig(TIM2, TIM_TRGO_SRC_OC1); // Channel1 generates TRGO
-  TIM_ConfigInt(TIM2, TIM_INT_CC2, ENABLE);     // Channel2 generates interrupt
-  TIM_ConfigInt(TIM2, TIM_INT_UPDATE, ENABLE);  // Update generates interrupt
+  TIM_SelectOutputTrig(TIM4, TIM_TRGO_SRC_OC1); // Channel1 generates TRGO
+  TIM_ConfigInt(TIM4, TIM_INT_CC2, ENABLE);     // Channel2 generates interrupt
+  TIM_ConfigInt(TIM4, TIM_INT_UPDATE, ENABLE);  // Update generates interrupt
 
   // Enable interrupts and start the timer
-  NVIC_SetPriority(TIM2_IRQn, 15);
-  NVIC_EnableIRQ(TIM2_IRQn);
+  NVIC_SetPriority(TIM4_IRQn, 15);
+  NVIC_EnableIRQ(TIM4_IRQn);
 
-  TIM_Enable(TIM2, ENABLE);
+  TIM_Enable(TIM4, ENABLE);
 }
 
 void hwInit(void) {
@@ -364,7 +365,7 @@ void hwInit(void) {
   adcInit();
 
   tim1Init();
-  tim2Init();
+  tim4Init();
 
   GPIO_ResetBits(LCD_BL_Port, LCD_BL_Pin); // Enable backlight, TODO: this should be done in Display::setBrightness
 }
