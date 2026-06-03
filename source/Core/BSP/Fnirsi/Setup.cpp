@@ -185,7 +185,9 @@ static void gpioInit(void) {
 #else
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_InitPeripheral(LED_Port, &GPIO_InitStructure);
-  GPIO_ResetBits(LED_Port, LED1_Pin | LED2_Pin); // Enable button LEDs
+  #if BUTTON_BACKLIGHT != 0
+  GPIO_SetBits(LED_Port, LED1_Pin); // Enable <-> button LEDs
+  #endif
 #endif
 
   // Temporary manual configs

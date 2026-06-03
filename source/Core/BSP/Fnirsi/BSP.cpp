@@ -10,6 +10,8 @@
 #include "Setup.h"
 #include "TipThermoModel.h"
 #include "history.hpp"
+#include "FreeRTOS.h"
+#include "task.h"
 // #include "USBPD.h"
 // #include "configuration.h"
 // #include "history.hpp"
@@ -131,7 +133,47 @@ bool          isTipDisconnected() {
 }
 
 void setStatusLED(const enum StatusLED state) {
-  // TODO: Add a nice visual feature to LCD
+  static bool led;
+  static TickType_t last;
+  TickType_t now = xTaskGetTickCount();
+  TickType_t delta = now - last;
+
+  switch (state) {
+  // ON
+  case LED_HOT:
+    led = true;
+    break;
+
+  // Blink fast
+  case LED_HEATING:
+    if (delta >= 200) {
+      led = !led;
+      last = now;
+    }
+    break;
+
+  // Slow flash
+  case LED_COOLING_STILL_HOT:
+    if ((led) && (delta >= 100)) {
+      led = !led;
+      last = now;
+    } else if ((!led) && (delta >= 900)) {
+      led = !led;
+      last = now;
+    }
+    break;
+
+  // OFF
+  default:
+    led = false;
+    break;
+  }
+
+  // Set LED state
+  if (led)
+    GPIO_SetBits(LED_Port, LED2_Pin);
+  else
+    GPIO_ResetBits(LED_Port, LED2_Pin);
 }
 void setBuzzer(bool on) {
   // TODO: Use channel3 of TIM1 to control brightness

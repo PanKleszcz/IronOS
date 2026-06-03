@@ -73,6 +73,12 @@
 #define DEFAULT_BRIGHTNESS 101  // default LCD brightness
 
 /**
+ * Button backlight <- ->
+ * 
+ */
+#define BUTTON_BACKLIGHT 0  // 0: Disabled, 1: Enabled (looks odd, leaks under OK button)
+
+/**
  * Temp change settings
  */
 #define TEMP_CHANGE_SHORT_STEP     1  // Default temp change short step +1
