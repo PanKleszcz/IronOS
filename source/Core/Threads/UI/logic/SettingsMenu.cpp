@@ -29,7 +29,7 @@ static void printShortDescription(SettingsItemIndex settingsItemIndex, uint16_t 
   #ifdef LCD_160x80
   Display::setCursor(4, 40);
   #else
-  Display::setCursor(cursorCharPosition * FONT_12_WIDTH - 2, 0);
+  Display::setCursor(cursorCharPosition * FONT_LARGE_WIDTH - 2, 0);
   #endif
 }
 

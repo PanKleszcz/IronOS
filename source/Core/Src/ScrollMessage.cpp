@@ -34,7 +34,7 @@ static uint16_t str_display_len(const char *const str) {
  *
  * @param message The null-terminated message string.
  */
-uint16_t messageWidth(const char *message) { return FONT_12_WIDTH * str_display_len(message); }
+uint16_t messageWidth(const char *message) { return FONT_LARGE_WIDTH * str_display_len(message); }
 
 void drawScrollingText(const char *message, TickType_t currentTickOffset) {
   Display::clearScreen();

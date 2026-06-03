@@ -17,7 +17,6 @@ enum class FontStyle {
   EXTRAS,
 };
 
-#define FONT_12_WIDTH 12
 // THE MAIN FONTS ARE NO LONGER HERE, MOVED TO PYTHON AUTO GEN
 // THESE ARE ONLY THE SYMBOL FONTS
 // clang-format off
