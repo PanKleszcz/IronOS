@@ -11,5 +11,5 @@
 
 // Set backlight brightness
 static inline void LCDSetBacklight(const uint8_t brightness){
-  TIM_SetCmp3(TIM1, brightness);
+  TIM_SetCmp3(TIM1, brightness > 100 ? 127 : brightness);
 }
