@@ -9,6 +9,8 @@
 #include "accelerometers_common.h"
 #include <KXTJ3.hpp>
 
+static int16_t ax, ay, az;
+
 bool KXTJ3::detect() {
   return (ACCEL_I2C_CLASS::probe(KXTJ3_I2C_ADDRESS) && 
           (ACCEL_I2C_CLASS::I2C_RegisterRead(KXTJ3_I2C_ADDRESS, KXTJ3_REG_WHO_AM_I) == KXTJ3_REG_WHO_AM_I_ID));
@@ -24,7 +26,12 @@ bool KXTJ3::initalize() {
 }
 
 Orientation KXTJ3::getOrientation() {
-  return Orientation::ORIENTATION_FLAT;
+  if (ax > KXJT3_ORIENTATION_THRESHOLD)
+    return Orientation::ORIENTATION_RIGHT_HAND;
+  else if (ax < -KXJT3_ORIENTATION_THRESHOLD)
+    return Orientation::ORIENTATION_LEFT_HAND;
+  else
+    return Orientation::ORIENTATION_FLAT;
 }
 
 void KXTJ3::getAxisReadings(int16_t &x, int16_t &y, int16_t &z) {
@@ -34,4 +41,7 @@ void KXTJ3::getAxisReadings(int16_t &x, int16_t &y, int16_t &z) {
   x = int16_t(((int16_t)temp[1]) << 8 | temp[0]) >> 2;
   y = int16_t(((int16_t)temp[3]) << 8 | temp[2]) >> 2;
   z = int16_t(((int16_t)temp[5]) << 8 | temp[4]) >> 2;
+  ax = x;
+  ay = y;
+  az = z;
 }
