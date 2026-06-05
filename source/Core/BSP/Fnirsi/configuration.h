@@ -64,13 +64,13 @@
 
 /**
  * LCD Brightness
- *
+ * Range 0 - 127; however, thee is no noticable increase over 100.
  */
-#define MIN_BRIGHTNESS     1   // Min OLED brightness selectable
-#define MAX_BRIGHTNESS     101 // Max OLED brightness selectable
+#define MIN_BRIGHTNESS     1    // Min LCD brightness selectable
+#define MAX_BRIGHTNESS     105  // Max LCD brightness selectable
 
-#define BRIGHTNESS_STEP    10   // LCD brightness increment
-#define DEFAULT_BRIGHTNESS 101  // default LCD brightness
+#define BRIGHTNESS_STEP    13   // LCD brightness increment
+#define DEFAULT_BRIGHTNESS 105  // default LCD brightness
 
 /**
  * Buzzer (annoying)

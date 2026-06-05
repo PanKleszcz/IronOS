@@ -70,13 +70,13 @@ void Display::drawChar(const uint16_t charCode, const FontStyle fontStyle, const
     index       = 0;
     switch (fontStyle) {
     case FontStyle::SMALL:
-      fontHeight = 8;
-      fontWidth  = 6;
+      fontHeight = FONT_SMALL_HEIGHT;
+      fontWidth  = FONT_SMALL_WIDTH;
       break;
     case FontStyle::LARGE:
     default:
-      fontHeight = 16;
-      fontWidth  = 12;
+      fontHeight = FONT_LARGE_HEIGHT;
+      fontWidth  = FONT_LARGE_WIDTH;
       break;
     }
     if (charCode == '\x01' && cursor_y == 0) { // 0x01 is used as new line char
@@ -181,8 +181,8 @@ void Display::transitionScrollDown(const TickType_t viewEnterTime) {
     }
     if (needsRefresh) {
       DISPLAY_CLASS::refresh();
+      vTaskDelayUntil(&startDraw, TICKS_100MS / 7);
     }
-    vTaskDelayUntil(&startDraw, TICKS_100MS / 7);
   }
 }
 /**
@@ -207,8 +207,8 @@ void Display::transitionScrollUp(const TickType_t viewEnterTime) {
     }
     if (needsRefresh) {
       DISPLAY_CLASS::refresh();
+      vTaskDelayUntil(&startDraw, TICKS_100MS / 7);
     }
-    vTaskDelayUntil(&startDraw, TICKS_100MS / 7);
   }
 }
 

@@ -4,48 +4,37 @@
 #ifdef LCD_160x80
 
 void ui_draw_soldering_power_status(bool boost_mode_on) {
-  if (Display::getRotation()) {
-    Display::setCursor(50, 0);
-  } else {
-    Display::setCursor(-1, 0);
-  }
-
+  // Print tip temp
+  Display::setCursor(4, 24);
   ui_draw_tip_temperature(true, FontStyle::LARGE);
 
+  Display::setCursor(24, 0);
   if (boost_mode_on) { // Boost mode is on
-    if (Display::getRotation()) {
-      Display::setCursor(34, 0);
-    } else {
-      Display::setCursor(50, 0);
-    }
-    Display::print(LargeSymbolPlus, FontStyle::LARGE);
-  } else {
+    Display::drawSymbol(2);
+  // } else {
+  //   Display::print(LargeSymbolSpace, FontStyle::SMALL);
+  }
 #ifndef NO_SLEEP_MODE
-    if (getSettingValue(SettingsOptions::Sensitivity) && getSettingValue(SettingsOptions::SleepTime)) {
-      if (Display::getRotation()) {
-        Display::setCursor(32, 0);
-      } else {
-        Display::setCursor(47, 0);
-      }
-      printCountdownUntilSleep(getSleepTimeout());
-    }
+  if (getSettingValue(SettingsOptions::Sensitivity) && getSettingValue(SettingsOptions::SleepTime)) {
+    Display::setCursor(120, 48);
+    printCountdownUntilSleep(getSleepTimeout());
+  }
 #endif
-    if (Display::getRotation()) {
-      Display::setCursor(32, 8);
-    } else {
-      Display::setCursor(47, 8);
-    }
-    Display::print(PowerSourceNames[getPowerSourceNumber()], FontStyle::SMALL, 2);
-  }
-
-  if (Display::getRotation()) {
-    Display::setCursor(0, 0);
-  } else {
-    Display::setCursor(67, 0);
-  }
+  // Print power source
+  Display::setCursor(132, 0);
+  Display::print(PowerSourceNames[getPowerSourceNumber()], FontStyle::SMALL, 2);
+  // Print set temp
+  Display::setCursor(40, 0);
+  Display::printNumber(getSettingValue(SettingsOptions::SolderingTemp), 3, FontStyle::SMALL);
+  Display::printSymbolDeg(FontStyle::EXTRAS);
+  // Print voltage
+  Display::setCursor(96, 16);
+  printVoltage();
+  Display::print(SmallSymbolVolts, FontStyle::SMALL);
   // Print wattage
+  Display::setCursor(96, 32);
+  uint32_t x10Watt = x10WattHistory.average();
   {
-    uint32_t x10Watt = x10WattHistory.average();
     if (x10Watt > 999) {
       // If we exceed 99.9W we drop the decimal place to keep it all fitting
       Display::print(SmallSymbolSpace, FontStyle::SMALL);
@@ -58,12 +47,5 @@ void ui_draw_soldering_power_status(bool boost_mode_on) {
     Display::print(SmallSymbolWatts, FontStyle::SMALL);
   }
 
-  if (Display::getRotation()) {
-    Display::setCursor(0, 8);
-  } else {
-    Display::setCursor(67, 8);
-  }
-  printVoltage();
-  Display::print(SmallSymbolVolts, FontStyle::SMALL);
 }
 #endif

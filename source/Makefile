@@ -40,6 +40,10 @@ LANGUAGE_GROUP_EUR_NAME=European
 
 LANGUAGE_GROUPS=CUSTOM CJK CYRILLIC EUR
 
+# Default fonts
+SMALL_FONT=default_6x8
+LARGE_FONT=default_12x16
+
 # Define for host Python
 ifndef HOST_PYTHON
 HOST_PYTHON:=python3
@@ -324,6 +328,9 @@ CPUFLAGS=-mcpu=cortex-m4  \
 
 CUSTOM_FORMAT_CMD=$(HOST_PYTHON) ${DEVICE_BSP_DIR}/Scripts/add_header.py bin
 
+SMALL_FONT=default_12x16
+LARGE_FONT=default_24x32
+
 endif # ALL_FNIRSI_MODELS
 
 DEVICE_BSP_INCLUDE_DIRS:= ${shell find ${DEVICE_BSP_DIR} -type d -print}
@@ -599,6 +606,8 @@ Core/Gen/Translation.%.cpp $(OUTPUT_DIR)/Core/Gen/translation.files/%.pickle: ..
 		--macros "$(CURDIR)/Core/Gen/macros.txt"      \
 		-o "$(CURDIR)/Core/Gen/Translation.$*.cpp"    \
 		--output-pickled "$(OUTPUT_DIR)/Core/Gen/translation.files/$*.pickle" \
+		--small-font "$(SMALL_FONT)" \
+		--large-font "$(LARGE_FONT)" \
 		$*
 
 Core/Gen/macros.txt: Makefile
@@ -630,6 +639,8 @@ Core/Gen/Translation_brieflz.%.cpp: $(OUTPUT_DIR)/Core/Gen/translation.files/%.o
 		-o "$(CURDIR)/Core/Gen/Translation_brieflz.$*.cpp" \
 		--input-pickled "$(OUTPUT_DIR)/Core/Gen/translation.files/$*.pickle" \
 		--strings-obj "$(OUTPUT_DIR)/Core/Gen/translation.files/$*.o"        \
+		--small-font "$(SMALL_FONT)" \
+		--large-font "$(LARGE_FONT)" \
 		$*
 
 Core/Gen/Translation_brieflz_font.%.cpp: $(OUTPUT_DIR)/Core/Gen/translation.files/%.pickle $(HOST_OUTPUT_DIR)/brieflz/libbrieflz.so Core/Gen/macros.txt
@@ -640,6 +651,8 @@ Core/Gen/Translation_brieflz_font.%.cpp: $(OUTPUT_DIR)/Core/Gen/translation.file
 		-o $(PWD)/Core/Gen/Translation_brieflz_font.$*.cpp \
 		--input-pickled $(OUTPUT_DIR)/Core/Gen/translation.files/$*.pickle \
 		--compress-font \
+		--small-font "$(SMALL_FONT)" \
+		--large-font "$(LARGE_FONT)" \
 		$*
 
 # The recipes to produce multi-language firmwares:
@@ -684,6 +697,8 @@ Core/Gen/Translation_multi.$(1).cpp: $(patsubst %,../Translations/translation_%.
 		--macros "$(CURDIR)/Core/Gen/macros.txt"           \
 		-o "$(CURDIR)/Core/Gen/Translation_multi.$(1).cpp" \
 		--output-pickled "$(OUTPUT_DIR)/Core/Gen/translation.files/multi.$(1).pickle" \
+		--small-font "$(SMALL_FONT)" \
+		--large-font "$(LARGE_FONT)" \
 		$(3)
 
 $(OUTPUT_DIR)/Core/Gen/translation.files/multi.$(1).pickle: Core/Gen/Translation_multi.$(1).cpp
@@ -697,6 +712,8 @@ Core/Gen/Translation_brieflz_multi.$(1).cpp: $(OUTPUT_DIR)/Core/Gen/translation.
 		--input-pickled "$(OUTPUT_DIR)/Core/Gen/translation.files/multi.$(1).pickle" \
 		--strings-obj "$(OUTPUT_DIR)/Core/Gen/translation.files/multi.$(1).o"        \
 		--compress-font \
+		--small-font "$(SMALL_FONT)" \
+		--large-font "$(LARGE_FONT)" \
 		$(3)
 
 endef # multi_lang_rule
