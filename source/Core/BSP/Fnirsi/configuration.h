@@ -163,8 +163,18 @@
 // #define TIPTYPE_T12    0 // Can manually pick a T12 tip
 #define NO_ACCEL // temporary
 
+/// Active Disturbance Rejection Control - first order
+// https://nl.mathworks.com/help/slcontrol/ug/active-disturbance-rejection-control.html
+// LIMITATION: estimator coefficients (A, B) are precalculated for FIXED sample rate
+#define TIP_CONTROL_ARDC1
+#define TIP_ARDC1_Kp            1.5
+#define TIP_ARDC1_Kd            0.5
+#define TIP_ARDC1_b0            0.085
+#define TIP_ARDC1_A             {6.7996e-02, 1.8013e-02, -9.0063e-01, 9.6863e-01}
+#define TIP_ARDC1_B             {TIP_ARDC1_b0*1.2609e-03/0.07, 9.3200e-01, TIP_ARDC1_b0*-2.1961e-03/0.07, 9.0063e-01}
+
 /// Use PID Control
-#define TIP_CONTROL_PID
+//#define TIP_CONTROL_PID
 #define TIP_PID_KP              20   // Good compromise between overshoot and reaction speed
 #define TIP_PID_KI              6    //
 #define TIP_PID_KD              8000 // C245 has a surprisingly high inertia, needs lot of dampening
