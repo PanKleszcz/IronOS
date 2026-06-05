@@ -163,11 +163,13 @@
 // #define TIPTYPE_T12    0 // Can manually pick a T12 tip
 #define NO_ACCEL // temporary
 
-// Let's use PID because why not.
-#define TIP_CONTROL_PID              // We use PID rather than integrator
+/// Use PID Control
+#define TIP_CONTROL_PID
 #define TIP_PID_KP              20   // Good compromise between overshoot and reaction speed
 #define TIP_PID_KI              6    //
 #define TIP_PID_KD              8000 // C245 has a surprisingly high inertia, needs lot of dampening
+
+/// Default Control if no other controller is defined
 #define TIP_THERMAL_MASS        0    // Not used for PID
 #define TIP_THERMAL_INERTIA     0    // Not used for PID
 #define TIP_RESISTANCE          25   // C245 is around 2.5R

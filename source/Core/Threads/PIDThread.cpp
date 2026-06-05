@@ -111,7 +111,7 @@ void startPIDTask(void const *argument __unused) {
   }
 }
 
-#ifdef TIP_CONTROL_PID
+#if defined (TIP_CONTROL_PID)
 template <class T, T Kp, T Ki, T Kd, T integral_limit_scale> struct PID {
   T previous_error_term;
   T integration_running_sum;
@@ -193,16 +193,16 @@ template <class T = TemperatureType_t> struct Integrator {
 int32_t getPIDResultX10Watts(TemperatureType_t set_point, TemperatureType_t current_reading) {
   static TickType_t lastCall = 0;
 
-#ifdef TIP_CONTROL_PID
-  static PID<TemperatureType_t, TIP_PID_KP, TIP_PID_KI, TIP_PID_KD, 5> pid = {0, 0};
-
+#if defined(TIP_CONTROL_PID)
+  static PID<TemperatureType_t, TIP_PID_KP, TIP_PID_KI, TIP_PID_KD, 5> ctrl = {0, 0};
   const TickType_t interval = (xTaskGetTickCount() - lastCall);
 
 #else
-  static Integrator<TemperatureType_t> powerStore = {0};
+  static Integrator<TemperatureType_t> ctrl = {0};
   const TickType_t                     rate       = TICKS_SECOND / (xTaskGetTickCount() - lastCall);
 #endif
   lastCall = xTaskGetTickCount();
+#if defined(TIP_CONTROL_PID)
   // Sandman note:
   // PID Challenge - we have a small thermal mass that we to want heat up as fast as possible but we don't
   // want to overshot excessively (if at all) the set point temperature. In the same time we have 'imprecise'
@@ -225,14 +225,13 @@ int32_t getPIDResultX10Watts(TemperatureType_t set_point, TemperatureType_t curr
   // Note on powerStore. On update, if the value is provided in X10 (W) units then inertia shall be provided
   // in X10 (J / °C) units as well.
 
-#ifdef TIP_CONTROL_PID
-  return pid.update(set_point, current_reading/10, interval, getX10WattageLimits());
+  return ctrl.update(set_point, current_reading/10, interval, getX10WattageLimits());
 #else
-  return powerStore.update(((TemperatureType_t)getTipThermalMass()) * (set_point - current_reading/10), // the required power
-                           getTipInertia(),                                                          // Inertia, smaller numbers increase dominance of the previous value
-                           2,                                                                        // gain
-                           rate,                                                                     // PID cycle frequency
-                           getX10WattageLimits());
+  return ctrl.update(((TemperatureType_t)getTipThermalMass()) * (set_point - current_reading/10), // the required power
+                        getTipInertia(),                                                          // Inertia, smaller numbers increase dominance of the previous value
+                        2,                                                                        // gain
+                        rate,                                                                     // PID cycle frequency
+                        getX10WattageLimits());
 #endif
 }
 
