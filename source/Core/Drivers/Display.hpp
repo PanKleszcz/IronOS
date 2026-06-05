@@ -36,11 +36,22 @@ extern "C" {
 #elif defined(LCD_160x80)
 #include "LCD.hpp"
 #define DISPLAY_CLASS LCD
-// Until proper LCD UI is implemented we emulate 128x32 OLED in the middle of the screen
-#define DISPLAY_WIDTH (128)
-#define DISPLAY_HEIGHT (32)
+#define DISPLAY_WIDTH (160)
+#define DISPLAY_HEIGHT (80)
 #else
 #error NO DISPLAY DEFINED
+#endif
+
+#if defined(LCD_160x80)
+#define FONT_SMALL_HEIGHT   (16)
+#define FONT_SMALL_WIDTH    (12)
+#define FONT_LARGE_HEIGHT   (32)
+#define FONT_LARGE_WIDTH    (24)
+#else
+#define FONT_SMALL_HEIGHT   (8)
+#define FONT_SMALL_WIDTH    (6)
+#define FONT_LARGE_HEIGHT   (16)
+#define FONT_LARGE_WIDTH    (12)
 #endif
 
 class Display {
@@ -92,7 +103,10 @@ public:
   static void drawBattery(uint8_t state) { drawSymbol(3 + (state > 10 ? 10 : state)); }
   // Draws a checkbox
   static void drawCheckbox(bool state) { drawSymbol((state) ? 16 : 17); }
-  inline static void drawUnavailableIcon() { DISPLAY_CLASS::drawArea(DISPLAY_WIDTH - DISPLAY_HEIGHT - 2, 0, DISPLAY_HEIGHT, DISPLAY_HEIGHT, UnavailableIcon); }
+  // Draw icons
+  inline static void drawUnavailableIcon() { DISPLAY_CLASS::drawArea(0, 40, 32, 32, UnavailableIcon); }
+  inline static void drawRepeatOnceIcon() { DISPLAY_CLASS::drawArea(0, 40, 32, 32, RepeatOnce); }
+  inline static void drawRepeatInfIcon() { DISPLAY_CLASS::drawArea(0, 40, 32, 32, RepeatInf); }
   static void debugNumber(int32_t val, FontStyle fontStyle);
   static void drawHex(uint32_t x, FontStyle fontStyle, uint8_t digits);
   static void drawSymbol(uint8_t symbolID);                                                           // Used for drawing symbols of a predictable width

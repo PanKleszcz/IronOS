@@ -1,8 +1,10 @@
 /*
- * OLED.cpp
+ * LCD.cpp
  *
- *  Created on: 29Aug.,2017
+ *  Created on: 27May.,2026
  *      Author: Ben V. Brown
+ *      Modified: MrTick, OK2CM
+ *      Target ST7735, Fnirsi HS02
  */
 #include "LCD.hpp"
 #ifdef LCD_160x80
@@ -14,13 +16,15 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "LCD_Port.hpp"
 
 // rendering to the buffer
-uint8_t *LCD::stripPointers[4]; // Pointers to the strips to allow for buffer having extra content
+uint8_t *LCD::stripPointers[LCD_HEIGHT / 8]; // Pointers to the strips to allow for buffer having extra content
 
-alignas(uint32_t) uint8_t LCD::screenBuffer[LCD_WIDTH * (LCD_HEIGHT / 8)]; // The data buffer
-alignas(uint32_t) uint8_t LCD::secondFrameBuffer[LCD_WIDTH * (LCD_HEIGHT / 8)];
+alignas(uint32_t) uint8_t LCD::screenBuffer[LCD_SCREEN_BUF_SIZE]; // The data buffer
+alignas(uint32_t) uint8_t LCD::secondFrameBuffer[LCD_SCREEN_BUF_SIZE];
 uint32_t LCD::displayChecksum;
+uint8_t  LCD::loopCounter;
 
 // ST7735 Commands
 #define ST7735_NOP     0x00
@@ -49,6 +53,11 @@ uint32_t LCD::displayChecksum;
 #define ST7735_GMCTRP1 0xE0
 #define ST7735_GMCTRN1 0xE1
 
+// LCD rotation
+const FRToSSPI::SPI_CMD lcdInitCmdRotR = {ST7735_MADCTL, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0x88}};
+const FRToSSPI::SPI_CMD lcdInitCmdRotL = {ST7735_MADCTL, FRToSSPI::SPI_CMD_PAYLOAD, 1, (uint8_t[]){0x48}};
+
+// LCD initialization
 const FRToSSPI::SPI_CMD lcdInitCmds[] = {
     {ST7735_SWRESET, FRToSSPI::SPI_CMD_DELAY_MS, 150,                                                                                                        NULL},
     { ST7735_SLPOUT, FRToSSPI::SPI_CMD_DELAY_MS, 200,                                                                                                        NULL},
@@ -69,7 +78,7 @@ const FRToSSPI::SPI_CMD lcdInitCmds[] = {
     { ST7735_INVCTR,  FRToSSPI::SPI_CMD_PAYLOAD,   1,                                                                                           (uint8_t[]){0x03}},
     {  ST7735_INVON,  FRToSSPI::SPI_CMD_PAYLOAD,   0,                                                                                                        NULL},
     { ST7735_VMCTR1,  FRToSSPI::SPI_CMD_PAYLOAD,   1,                                                                                           (uint8_t[]){0x0E}},
-    { ST7735_MADCTL,  FRToSSPI::SPI_CMD_PAYLOAD,   1,                                                                                           (uint8_t[]){0x88}},
+    lcdInitCmdRotR,
     { ST7735_COLMOD,  FRToSSPI::SPI_CMD_PAYLOAD,   1,                                                                                           (uint8_t[]){0x05}},
 
     {  ST7735_NORON, FRToSSPI::SPI_CMD_DELAY_MS,  10,                                                                                                        NULL},
@@ -108,10 +117,9 @@ static uint16_t easeInOutTiming(uint16_t t) { return t * t * (300 - 2 * t) / 100
 static uint16_t lerp(uint16_t a, uint16_t b, uint16_t t) { return a + t * (b - a) / 100; }
 
 void LCD::initialize() {
-  stripPointers[0] = &screenBuffer[0 * LCD_WIDTH];
-  stripPointers[1] = &screenBuffer[1 * LCD_WIDTH];
-  stripPointers[2] = &screenBuffer[2 * LCD_WIDTH];
-  stripPointers[3] = &screenBuffer[3 * LCD_WIDTH];
+  for (uint8_t i = 0; i < LCD_HEIGHT/8; i++) {
+    stripPointers[i] = &screenBuffer[i * LCD_WIDTH];
+  }
 
   FRToSSPI::init();
   FRToSSPI::sendCmdChain(lcdInitCmds, sizeof(lcdInitCmds) / sizeof(*lcdInitCmds));
@@ -119,19 +127,12 @@ void LCD::initialize() {
   // Erase background
   setDrawingWindow(0, 0, 160, 80);
   FRToSSPI::sendByteMutiple(0x00, 2 * 160 * 80);
-
-  // Draw a nice frame for the emulated OLED display
-  setDrawingWindow(12, 20, 136, 40);
-  FRToSSPI::sendByteMutiple(0xFF, 2 * 136 * 40);
-  setDrawingWindow(14, 22, 132, 36);
-  FRToSSPI::sendByteMutiple(0x00, 2 * 132 * 36);
 }
 
 void LCD::setFramebuffer(uint8_t *buffer) {
-  stripPointers[0] = &buffer[0 * LCD_WIDTH];
-  stripPointers[1] = &buffer[1 * LCD_WIDTH];
-  stripPointers[2] = &buffer[2 * LCD_WIDTH];
-  stripPointers[3] = &buffer[3 * LCD_WIDTH];
+  for (uint8_t i = 0; i < LCD_HEIGHT/8; i++) {
+    stripPointers[i] = &buffer[i * LCD_WIDTH];
+  }
 }
 
 /**
@@ -141,11 +142,10 @@ void LCD::setFramebuffer(uint8_t *buffer) {
  * Otherwise a rewinding navigation animation is shown to the second framebuffer contents.
  */
 bool LCD::scrollHorizontal(const bool dirForward, uint16_t progress, uint8_t offset) {
-  uint8_t *stripBackPointers[4];
-  stripBackPointers[0] = &secondFrameBuffer[0 * LCD_WIDTH];
-  stripBackPointers[1] = &secondFrameBuffer[1 * LCD_WIDTH];
-  stripBackPointers[2] = &secondFrameBuffer[2 * LCD_WIDTH];
-  stripBackPointers[3] = &secondFrameBuffer[3 * LCD_WIDTH];
+  uint8_t *stripBackPointers[LCD_HEIGHT/8];
+  for (uint8_t i = 0; i < LCD_HEIGHT/8; i++) {
+    stripBackPointers[i] = &secondFrameBuffer[i * LCD_WIDTH];
+  }
 
   // When forward, current contents move to the left out.
   // Otherwise the contents move to the right out.
@@ -159,15 +159,13 @@ bool LCD::scrollHorizontal(const bool dirForward, uint16_t progress, uint8_t off
 
   offset = progress;
 
-  memmove(&stripPointers[0][oldStart], &stripPointers[0][oldPrevious], LCD_WIDTH - progress);
-  memmove(&stripPointers[1][oldStart], &stripPointers[1][oldPrevious], LCD_WIDTH - progress);
-  memmove(&stripPointers[2][oldStart], &stripPointers[2][oldPrevious], LCD_WIDTH - progress);
-  memmove(&stripPointers[3][oldStart], &stripPointers[3][oldPrevious], LCD_WIDTH - progress);
+  for (uint8_t i = 0; i < LCD_HEIGHT/8; i++) {
+    memmove(&stripPointers[i][oldStart], &stripPointers[i][oldPrevious], LCD_WIDTH - progress);
+  }
 
-  memmove(&stripPointers[0][newStart], &stripBackPointers[0][newEnd], progress);
-  memmove(&stripPointers[1][newStart], &stripBackPointers[1][newEnd], progress);
-  memmove(&stripPointers[2][newStart], &stripBackPointers[2][newEnd], progress);
-  memmove(&stripPointers[3][newStart], &stripBackPointers[3][newEnd], progress);
+  for (uint8_t i = 0; i < LCD_HEIGHT/8; i++) {
+    memmove(&stripPointers[i][newStart], &stripBackPointers[i][newEnd], progress);
+  }
 
   return true;
 }
@@ -188,32 +186,46 @@ void LCD::useSecondaryFramebuffer(bool useSecondary) {
  * **This function blocks until the transition has completed or user presses button**
  */
 bool LCD::scrollDown(uint8_t pos) {
-
+  static_assert(LCD_WIDTH % 4 == 0, "LCD_WIDTH must be multiple of 4");
+  static_assert(LCD_HEIGHT == 80, "LCD_HEIGHT must be 80");
+  uint32_t *const pA = (uint32_t*)screenBuffer;
+  uint32_t *const pB = (uint32_t*)secondFrameBuffer;
   // For each line, we shuffle all bits up a row
-  for (uint8_t xPos = 0; xPos < LCD_WIDTH; xPos++) {
-    const uint16_t firstStripPos  = xPos;
-    const uint16_t secondStripPos = firstStripPos + LCD_WIDTH;
-    const uint16_t thirdStripPos  = secondStripPos + LCD_WIDTH;
-    const uint16_t fourthStripPos = thirdStripPos + LCD_WIDTH;
+  for (uint8_t xPos = 0; xPos < LCD_WIDTH/4; xPos++) {
+    const uint16_t Strip01Pos = xPos;
+    const uint16_t Strip02Pos = Strip01Pos + LCD_WIDTH/4;
+    const uint16_t Strip03Pos = Strip02Pos + LCD_WIDTH/4;
+    const uint16_t Strip04Pos = Strip03Pos + LCD_WIDTH/4;
+    const uint16_t Strip05Pos = Strip04Pos + LCD_WIDTH/4;
+    const uint16_t Strip06Pos = Strip05Pos + LCD_WIDTH/4;
+    const uint16_t Strip07Pos = Strip06Pos + LCD_WIDTH/4;
+    const uint16_t Strip08Pos = Strip07Pos + LCD_WIDTH/4;
+    const uint16_t Strip09Pos = Strip08Pos + LCD_WIDTH/4;
+    const uint16_t Strip10Pos = Strip09Pos + LCD_WIDTH/4;
 
-    // Move the MSB off the first strip, and pop MSB from second strip onto the first strip
-    screenBuffer[firstStripPos] = (screenBuffer[firstStripPos] >> 1) | ((screenBuffer[secondStripPos] & 0x01) << 7);
-    // Now shuffle off the second strip
-    screenBuffer[secondStripPos] = (screenBuffer[secondStripPos] >> 1) | ((screenBuffer[thirdStripPos] & 0x01) << 7);
-    // Now shuffle off the third strip
-    screenBuffer[thirdStripPos] = (screenBuffer[thirdStripPos] >> 1) | ((screenBuffer[fourthStripPos] & 0x01) << 7);
-    // Now forth strip gets the start of the new buffer
-    screenBuffer[fourthStripPos] = (screenBuffer[fourthStripPos] >> 1) | ((secondFrameBuffer[firstStripPos] & 0x01) << 7);
-    // Now cycle all the secondary buffers
+    pA[Strip01Pos] = ((pA[Strip01Pos] >> 1) & 0x7F7F7F7F) | ((pA[Strip02Pos] & 0x01010101) << 7);
+    pA[Strip02Pos] = ((pA[Strip02Pos] >> 1) & 0x7F7F7F7F) | ((pA[Strip03Pos] & 0x01010101) << 7);
+    pA[Strip03Pos] = ((pA[Strip03Pos] >> 1) & 0x7F7F7F7F) | ((pA[Strip04Pos] & 0x01010101) << 7);
+    pA[Strip04Pos] = ((pA[Strip04Pos] >> 1) & 0x7F7F7F7F) | ((pA[Strip05Pos] & 0x01010101) << 7);
+    pA[Strip05Pos] = ((pA[Strip05Pos] >> 1) & 0x7F7F7F7F) | ((pA[Strip06Pos] & 0x01010101) << 7);
+    pA[Strip06Pos] = ((pA[Strip06Pos] >> 1) & 0x7F7F7F7F) | ((pA[Strip07Pos] & 0x01010101) << 7);
+    pA[Strip07Pos] = ((pA[Strip07Pos] >> 1) & 0x7F7F7F7F) | ((pA[Strip08Pos] & 0x01010101) << 7);
+    pA[Strip08Pos] = ((pA[Strip08Pos] >> 1) & 0x7F7F7F7F) | ((pA[Strip09Pos] & 0x01010101) << 7);
+    pA[Strip09Pos] = ((pA[Strip09Pos] >> 1) & 0x7F7F7F7F) | ((pA[Strip10Pos] & 0x01010101) << 7);
+    pA[Strip10Pos] = ((pA[Strip10Pos] >> 1) & 0x7F7F7F7F) | ((pB[Strip01Pos] & 0x01010101) << 7);
 
-    secondFrameBuffer[firstStripPos]  = (secondFrameBuffer[firstStripPos] >> 1) | ((secondFrameBuffer[secondStripPos] & 0x01) << 7);
-    secondFrameBuffer[secondStripPos] = (secondFrameBuffer[secondStripPos] >> 1) | ((secondFrameBuffer[thirdStripPos] & 0x01) << 7);
-    secondFrameBuffer[thirdStripPos]  = (secondFrameBuffer[thirdStripPos] >> 1) | ((secondFrameBuffer[fourthStripPos] & 0x01) << 7);
-    // Finally on the bottom row; we shuffle it up ready
-    secondFrameBuffer[fourthStripPos] >>= 1;
+    pB[Strip01Pos] = ((pB[Strip01Pos] >> 1) & 0x7F7F7F7F) | ((pB[Strip02Pos] & 0x01010101) << 7);
+    pB[Strip02Pos] = ((pB[Strip02Pos] >> 1) & 0x7F7F7F7F) | ((pB[Strip03Pos] & 0x01010101) << 7);
+    pB[Strip03Pos] = ((pB[Strip03Pos] >> 1) & 0x7F7F7F7F) | ((pB[Strip04Pos] & 0x01010101) << 7);
+    pB[Strip04Pos] = ((pB[Strip04Pos] >> 1) & 0x7F7F7F7F) | ((pB[Strip05Pos] & 0x01010101) << 7);
+    pB[Strip05Pos] = ((pB[Strip05Pos] >> 1) & 0x7F7F7F7F) | ((pB[Strip06Pos] & 0x01010101) << 7);
+    pB[Strip06Pos] = ((pB[Strip06Pos] >> 1) & 0x7F7F7F7F) | ((pB[Strip07Pos] & 0x01010101) << 7);
+    pB[Strip07Pos] = ((pB[Strip07Pos] >> 1) & 0x7F7F7F7F) | ((pB[Strip08Pos] & 0x01010101) << 7);
+    pB[Strip08Pos] = ((pB[Strip08Pos] >> 1) & 0x7F7F7F7F) | ((pB[Strip09Pos] & 0x01010101) << 7);
+    pB[Strip09Pos] = ((pB[Strip09Pos] >> 1) & 0x7F7F7F7F) | ((pB[Strip10Pos] & 0x01010101) << 7);
+    pB[Strip10Pos] = ((pB[Strip10Pos] >> 1) & 0x7F7F7F7F);
   }
-
-  return true;
+  return (loopCounter++ % 3 == 0);
 }
 /**
  * This assumes that the current display output buffer has the current on screen contents
@@ -223,39 +235,66 @@ bool LCD::scrollDown(uint8_t pos) {
  * **This function blocks until the transition has completed or user presses button**
  */
 bool LCD::scrollUp(uint8_t pos) {
+  static_assert(LCD_WIDTH % 4 == 0, "LCD_WIDTH must be multiple of 4");
+  static_assert(LCD_HEIGHT == 80, "LCD_HEIGHT must be 80");
+  uint32_t *const pA = (uint32_t*)screenBuffer;
+  uint32_t *const pB = (uint32_t*)secondFrameBuffer;
   // For each line, we shuffle all bits down a row
-  for (uint8_t xPos = 0; xPos < LCD_WIDTH; xPos++) {
-    const uint16_t firstStripPos  = xPos;
-    const uint16_t secondStripPos = firstStripPos + LCD_WIDTH;
-    const uint16_t thirdStripPos  = secondStripPos + LCD_WIDTH;
-    const uint16_t fourthStripPos = thirdStripPos + LCD_WIDTH;
+  for (uint8_t xPos = 0; xPos < LCD_WIDTH/4; xPos++) {
+    const uint16_t Strip01Pos = xPos;
+    const uint16_t Strip02Pos = Strip01Pos + LCD_WIDTH/4;
+    const uint16_t Strip03Pos = Strip02Pos + LCD_WIDTH/4;
+    const uint16_t Strip04Pos = Strip03Pos + LCD_WIDTH/4;
+    const uint16_t Strip05Pos = Strip04Pos + LCD_WIDTH/4;
+    const uint16_t Strip06Pos = Strip05Pos + LCD_WIDTH/4;
+    const uint16_t Strip07Pos = Strip06Pos + LCD_WIDTH/4;
+    const uint16_t Strip08Pos = Strip07Pos + LCD_WIDTH/4;
+    const uint16_t Strip09Pos = Strip08Pos + LCD_WIDTH/4;
+    const uint16_t Strip10Pos = Strip09Pos + LCD_WIDTH/4;
 
-    // We are shffling LSB's off the end and pushing bits down
-    screenBuffer[fourthStripPos] = (screenBuffer[fourthStripPos] << 1) | ((screenBuffer[thirdStripPos] & 0x80) >> 7);
-    screenBuffer[thirdStripPos]  = (screenBuffer[thirdStripPos] << 1) | ((screenBuffer[secondStripPos] & 0x80) >> 7);
-    screenBuffer[secondStripPos] = (screenBuffer[secondStripPos] << 1) | ((screenBuffer[firstStripPos] & 0x80) >> 7);
-    screenBuffer[firstStripPos]  = (screenBuffer[firstStripPos] << 1) | ((secondFrameBuffer[fourthStripPos] & 0x80) >> 7);
+    pA[Strip10Pos] = ((pA[Strip10Pos] << 1) & 0xFEFEFEFE) | ((pA[Strip09Pos] & 0x80808080) >> 7);
+    pA[Strip09Pos] = ((pA[Strip09Pos] << 1) & 0xFEFEFEFE) | ((pA[Strip08Pos] & 0x80808080) >> 7);
+    pA[Strip08Pos] = ((pA[Strip08Pos] << 1) & 0xFEFEFEFE) | ((pA[Strip07Pos] & 0x80808080) >> 7);
+    pA[Strip07Pos] = ((pA[Strip07Pos] << 1) & 0xFEFEFEFE) | ((pA[Strip06Pos] & 0x80808080) >> 7);
+    pA[Strip06Pos] = ((pA[Strip06Pos] << 1) & 0xFEFEFEFE) | ((pA[Strip05Pos] & 0x80808080) >> 7);
+    pA[Strip05Pos] = ((pA[Strip05Pos] << 1) & 0xFEFEFEFE) | ((pA[Strip04Pos] & 0x80808080) >> 7);
+    pA[Strip04Pos] = ((pA[Strip04Pos] << 1) & 0xFEFEFEFE) | ((pA[Strip03Pos] & 0x80808080) >> 7);
+    pA[Strip03Pos] = ((pA[Strip03Pos] << 1) & 0xFEFEFEFE) | ((pA[Strip02Pos] & 0x80808080) >> 7);
+    pA[Strip02Pos] = ((pA[Strip02Pos] << 1) & 0xFEFEFEFE) | ((pA[Strip01Pos] & 0x80808080) >> 7);
+    pA[Strip01Pos] = ((pA[Strip01Pos] << 1) & 0xFEFEFEFE) | ((pB[Strip10Pos] & 0x80808080) >> 7);
 
-    secondFrameBuffer[fourthStripPos] = (secondFrameBuffer[fourthStripPos] << 1) | ((secondFrameBuffer[thirdStripPos] & 0x80) >> 7);
-    secondFrameBuffer[thirdStripPos]  = (secondFrameBuffer[thirdStripPos] << 1) | ((secondFrameBuffer[secondStripPos] & 0x80) >> 7);
-    secondFrameBuffer[secondStripPos] = (secondFrameBuffer[secondStripPos] << 1) | ((secondFrameBuffer[firstStripPos] & 0x80) >> 7);
-    // Finally on the bottom row; we shuffle it up ready
-    secondFrameBuffer[firstStripPos] <<= 1;
+    pB[Strip10Pos] = ((pB[Strip10Pos] << 1) & 0xFEFEFEFE) | ((pB[Strip09Pos] & 0x80808080) >> 7);
+    pB[Strip09Pos] = ((pB[Strip09Pos] << 1) & 0xFEFEFEFE) | ((pB[Strip08Pos] & 0x80808080) >> 7);
+    pB[Strip08Pos] = ((pB[Strip08Pos] << 1) & 0xFEFEFEFE) | ((pB[Strip07Pos] & 0x80808080) >> 7);
+    pB[Strip07Pos] = ((pB[Strip07Pos] << 1) & 0xFEFEFEFE) | ((pB[Strip06Pos] & 0x80808080) >> 7);
+    pB[Strip06Pos] = ((pB[Strip06Pos] << 1) & 0xFEFEFEFE) | ((pB[Strip05Pos] & 0x80808080) >> 7);
+    pB[Strip05Pos] = ((pB[Strip05Pos] << 1) & 0xFEFEFEFE) | ((pB[Strip04Pos] & 0x80808080) >> 7);
+    pB[Strip04Pos] = ((pB[Strip04Pos] << 1) & 0xFEFEFEFE) | ((pB[Strip03Pos] & 0x80808080) >> 7);
+    pB[Strip03Pos] = ((pB[Strip03Pos] << 1) & 0xFEFEFEFE) | ((pB[Strip02Pos] & 0x80808080) >> 7);
+    pB[Strip02Pos] = ((pB[Strip02Pos] << 1) & 0xFEFEFEFE) | ((pB[Strip01Pos] & 0x80808080) >> 7);
+    pB[Strip01Pos] = ((pB[Strip01Pos] << 1) & 0xFEFEFEFE);
   }
-
-  return true;
+  return (loopCounter++ % 3 == 0);
 }
 
 void LCD::setRotation(bool leftHanded) {
-  // TODO implement
+  if (leftHanded) {
+    FRToSSPI::sendCmdChain(&lcdInitCmdRotL, 1);
+  } else {
+    FRToSSPI::sendCmdChain(&lcdInitCmdRotR, 1);
+  }
+  refresh(true);
 }
 
 void LCD::setBrightness(uint8_t brightness) {
-  // TODO implement
+  LCDSetBacklight(brightness);
 }
 
 void LCD::setInverse(bool inverse) {
-  // TODO implement
+  const FRToSSPI::SPI_CMD cmdInvSet = {
+    (uint8_t)(inverse ? ST7735_INVON : ST7735_INVOFF), FRToSSPI::SPI_CMD_PAYLOAD, 0, NULL
+  };
+  FRToSSPI::sendCmdChain(&cmdInvSet, 1);
 }
 
 void LCD::flushSecondBuffer(void) { memcpy(screenBuffer, secondFrameBuffer, sizeof(screenBuffer)); }

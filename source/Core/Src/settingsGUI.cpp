@@ -475,7 +475,7 @@ static void printShortDescription(SettingsItemIndex settingsItemIndex, uint16_t 
 
   // prepare cursor for value
   // make room for scroll indicator
-  Display::setCursor(cursorCharPosition * FONT_12_WIDTH - 2, 0);
+  Display::setCursor(cursorCharPosition * FONT_SMALL_WIDTH - 2, 0);
 }
 
 static int userConfirmation(const char *message) {
@@ -896,10 +896,10 @@ static void displayLogoTime(void) {
     Display::drawUnavailableIcon();
     break;
   case logoMode_t::ONETIME:
-    Display::drawArea(DISPLAY_WIDTH - DISPLAY_HEIGHT - 2, 0, DISPLAY_HEIGHT, DISPLAY_HEIGHT, RepeatOnce);
+    Display::drawRepeatOnceIcon();
     break;
   case logoMode_t::INFINITY:
-    Display::drawArea(DISPLAY_WIDTH - DISPLAY_HEIGHT - 2, 0, DISPLAY_HEIGHT, DISPLAY_HEIGHT, RepeatInf);
+    Display::drawRepeatInfIcon();
     break;
   default:
     Display::printNumber(getSettingValue(SettingsOptions::LOGOTime), 1, FontStyle::LARGE);
@@ -944,13 +944,13 @@ static void setCalibrateVIN(void) {
   Display::clearScreen();
 
   for (;;) {
-    Display::setCursor(25, 0);
+    Display::setCursor(DISPLAY_WIDTH - 5*FONT_LARGE_WIDTH, 8);
     uint16_t voltage = getInputVoltageX10(getSettingValue(SettingsOptions::VoltageDiv), 0);
     Display::printNumber(voltage / 10, 2, FontStyle::LARGE);
     Display::print(LargeSymbolDot, FontStyle::LARGE);
     Display::printNumber(voltage % 10, 1, FontStyle::LARGE, false);
     Display::print(LargeSymbolVolts, FontStyle::LARGE);
-    Display::setCursor(0, 8);
+    Display::setCursor(DISPLAY_WIDTH - 3*FONT_SMALL_WIDTH, 48);
     Display::printNumber(getSettingValue(SettingsOptions::VoltageDiv), 3, FontStyle::SMALL);
 
     switch (getButtonState()) {

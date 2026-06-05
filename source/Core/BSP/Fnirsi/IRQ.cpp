@@ -34,10 +34,10 @@ void ADC_IRQHandler(void) {
 extern uint16_t PWMSafetyTimer;
 extern uint8_t  pendingPWM;
 
-void TIM2_IRQHandler(void) {
+void TIM4_IRQHandler(void) {
   // Corresponds to ST PeriodElapsed
-  if (SET == TIM_GetIntStatus(TIM2, TIM_INT_UPDATE)) {
-    TIM_ClrIntPendingBit(TIM2, TIM_INT_UPDATE);
+  if (SET == TIM_GetIntStatus(TIM4, TIM_INT_UPDATE)) {
+    TIM_ClrIntPendingBit(TIM4, TIM_INT_UPDATE);
 
     // we want to turn on the output again
     PWMSafetyTimer--;
@@ -55,13 +55,13 @@ void TIM2_IRQHandler(void) {
   }
 
   // Corresponds to ST PulseFinished
-  if (SET == TIM_GetIntStatus(TIM2, TIM_INT_CC2)) {
-    TIM_ClrIntPendingBit(TIM2, TIM_INT_CC2);
+  if (SET == TIM_GetIntStatus(TIM4, TIM_INT_CC2)) {
+    TIM_ClrIntPendingBit(TIM4, TIM_INT_CC2);
     TIM1->CCDAT1 = 0;
     return;
   }
 
   // for (;;) {
   // }
-  TIM2->STS |= TIM2->STS; // Should be unreachable, but for some reasons channels 2-4 fire interrupts
+  TIM4->STS |= TIM4->STS; // Should be unreachable, but for some reasons channels 2-4 fire interrupts
 }

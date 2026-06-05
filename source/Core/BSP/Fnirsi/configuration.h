@@ -64,13 +64,25 @@
 
 /**
  * LCD Brightness
+ * Range 0 - 127; however, thee is no noticable increase over 100.
+ */
+#define MIN_BRIGHTNESS     1    // Min LCD brightness selectable
+#define MAX_BRIGHTNESS     105  // Max LCD brightness selectable
+
+#define BRIGHTNESS_STEP    13   // LCD brightness increment
+#define DEFAULT_BRIGHTNESS 105  // default LCD brightness
+
+/**
+ * Buzzer (annoying)
  *
  */
-#define MIN_BRIGHTNESS     1   // Min OLED brightness selectable
-#define MAX_BRIGHTNESS     101 // Max OLED brightness selectable
+#define BUZZER_VOLUME 0 // Range: 0 - 20
 
-#define BRIGHTNESS_STEP    10   // LCD brightness increment
-#define DEFAULT_BRIGHTNESS 101  // default LCD brightness
+/**
+ * Button backlight <- ->
+ * 
+ */
+#define BUTTON_BACKLIGHT 0  // 0: Disabled, 1: Enabled (looks odd, leaks under OK button)
 
 /**
  * Temp change settings
@@ -158,11 +170,23 @@
 // #define OLED_I2CBB1    0
 // #define TIPTYPE_T12    0 // Can manually pick a T12 tip
 
-// Let's use PID because why not.
-#define TIP_CONTROL_PID              // We use PID rather than integrator
+/// Active Disturbance Rejection Control - first order
+// https://nl.mathworks.com/help/slcontrol/ug/active-disturbance-rejection-control.html
+// LIMITATION: estimator coefficients (A, B) are precalculated for FIXED sample rate
+#define TIP_CONTROL_ARDC1
+#define TIP_ARDC1_Kp            1.5
+#define TIP_ARDC1_Kd            0.5
+#define TIP_ARDC1_b0            0.085
+#define TIP_ARDC1_A             {6.7996e-02, 1.8013e-02, -9.0063e-01, 9.6863e-01}
+#define TIP_ARDC1_B             {TIP_ARDC1_b0*1.2609e-03/0.07, 9.3200e-01, TIP_ARDC1_b0*-2.1961e-03/0.07, 9.0063e-01}
+
+/// Use PID Control
+//#define TIP_CONTROL_PID
 #define TIP_PID_KP              20   // Good compromise between overshoot and reaction speed
 #define TIP_PID_KI              6    //
 #define TIP_PID_KD              8000 // C245 has a surprisingly high inertia, needs lot of dampening
+
+/// Default Control if no other controller is defined
 #define TIP_THERMAL_MASS        0    // Not used for PID
 #define TIP_THERMAL_INERTIA     0    // Not used for PID
 #define TIP_RESISTANCE          25   // C245 is around 2.5R

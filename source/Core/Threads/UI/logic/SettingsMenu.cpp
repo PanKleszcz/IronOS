@@ -26,7 +26,11 @@ static void printShortDescription(SettingsItemIndex settingsItemIndex, uint16_t 
 
   // prepare cursor for value
   // make room for scroll indicator
-  Display::setCursor(cursorCharPosition * FONT_12_WIDTH - 2, 0);
+  #ifdef LCD_160x80
+  Display::setCursor(4, 40);
+  #else
+  Display::setCursor(cursorCharPosition * FONT_LARGE_WIDTH - 2, 0);
+  #endif
 }
 
 // Render a menu, based on the position given

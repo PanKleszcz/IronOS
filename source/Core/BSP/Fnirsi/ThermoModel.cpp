@@ -12,7 +12,7 @@
 
 extern uint16_t tipSenseResistancex10Ohms;
 
-TemperatureType_t TipThermoModel::convertuVToDegC(uint32_t tipuVDelta) {
+TemperatureType_t TipThermoModel::convertuVToDegCx10(uint32_t tipuVDelta) {
   // let's assume 21uV per 1C here
-  return (tipuVDelta) / 21;
+  return (10*tipuVDelta) / 21;
 }
