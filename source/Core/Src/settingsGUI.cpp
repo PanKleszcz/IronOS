@@ -896,10 +896,10 @@ static void displayLogoTime(void) {
     Display::drawUnavailableIcon();
     break;
   case logoMode_t::ONETIME:
-    Display::drawArea(DISPLAY_WIDTH - DISPLAY_HEIGHT - 2, 0, DISPLAY_HEIGHT, DISPLAY_HEIGHT, RepeatOnce);
+    Display::drawRepeatOnceIcon();
     break;
   case logoMode_t::INFINITY:
-    Display::drawArea(DISPLAY_WIDTH - DISPLAY_HEIGHT - 2, 0, DISPLAY_HEIGHT, DISPLAY_HEIGHT, RepeatInf);
+    Display::drawRepeatInfIcon();
     break;
   default:
     Display::printNumber(getSettingValue(SettingsOptions::LOGOTime), 1, FontStyle::LARGE);
