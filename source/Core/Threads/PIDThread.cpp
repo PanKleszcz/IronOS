@@ -82,22 +82,18 @@ void startPIDTask(void const *argument __unused) {
       TemperatureType_t currentTipTempInCx10 = TipThermoModel::getTipInCx10(true);
 
       PIDTempTarget = currentTempTargetDegC;
-      if (PIDTempTarget > 0) {
-        // Cap the max set point to 450C
-        if (PIDTempTarget > 450) {
-          // Maximum allowed output
-          PIDTempTarget = 450;
-        }
-        // Safety check that not aiming higher than current tip can measure
-        if (PIDTempTarget > TipThermoModel::getTipMaxInC()) {
-          PIDTempTarget = TipThermoModel::getTipMaxInC();
-        }
-
-        x10WattsOut = getPIDResultX10Watts(PIDTempTarget, currentTipTempInCx10);
-        detectThermalRunaway(currentTipTempInCx10/10, x10WattsOut);
-      } else {
-        detectThermalRunaway(currentTipTempInCx10/10, 0);
+      // Cap the max set point to 450C
+      if (PIDTempTarget > 450) {
+        // Maximum allowed output
+        PIDTempTarget = 450;
       }
+      // Safety check that not aiming higher than current tip can measure
+      if (PIDTempTarget > TipThermoModel::getTipMaxInC()) {
+        PIDTempTarget = TipThermoModel::getTipMaxInC();
+      }
+
+      x10WattsOut = getPIDResultX10Watts(PIDTempTarget, currentTipTempInCx10);
+      detectThermalRunaway(currentTipTempInCx10/10, PIDTempTarget > 0 ? x10WattsOut : 0);
       setOutputx10WattsViaFilters(x10WattsOut);
     } else {
       // ADC interrupt timeout
@@ -158,6 +154,11 @@ template <class T, T Kp, T Ki, T Kd, T integral_limit_scale> struct PID {
 
     // Save target_delta to previous target_delta
     previous_error_term = target_delta;
+
+    // Make sure that output is disabled
+    if (set_point < MIN_TEMP_C) {
+      output = 0;
+    }
 
     return output;
   }
