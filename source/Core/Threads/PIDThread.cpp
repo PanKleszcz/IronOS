@@ -24,7 +24,7 @@
 
 static TickType_t          powerPulseWaitUnit          = 25 * TICKS_100MS;      // 2.5 s
 static TickType_t          powerPulseDurationUnit      = (5 * TICKS_100MS) / 2; // 250 ms
-TaskHandle_t               pidTaskNotification         = NULL;
+volatile TaskHandle_t      pidTaskNotification         = NULL;
 volatile TemperatureType_t currentTempTargetDegC       = 0; // Current temperature target in C
 int32_t                    powerSupplyWattageLimit     = 0;
 uint8_t                    heaterThermalRunawayCounter = 0;
@@ -126,7 +126,7 @@ template <class T, T Kp, T Ki, T Kd, T integral_limit_scale> struct PID {
     // Thus we multiply this out by the interval time to ~= dv/dt
     // Then the shift by 1000 is ms -> Seconds
 
-    integration_running_sum += (target_delta * interval_ms * Ki) / 1000;
+    integration_running_sum += (target_delta * (T)interval_ms * Ki) / 1000;
 
     // We constrain integration_running_sum to limit windup
     // This is not overly required for most use cases but can prevent large overshoot in constrained implementations
