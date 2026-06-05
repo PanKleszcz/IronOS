@@ -103,7 +103,10 @@ public:
   static void drawBattery(uint8_t state) { drawSymbol(3 + (state > 10 ? 10 : state)); }
   // Draws a checkbox
   static void drawCheckbox(bool state) { drawSymbol((state) ? 16 : 17); }
+  // Draw icons
   inline static void drawUnavailableIcon() { DISPLAY_CLASS::drawArea(0, 40, 32, 32, UnavailableIcon); }
+  inline static void drawRepeatOnceIcon() { DISPLAY_CLASS::drawArea(0, 40, 32, 32, RepeatOnce); }
+  inline static void drawRepeatInfIcon() { DISPLAY_CLASS::drawArea(0, 40, 32, 32, RepeatInf); }
   static void debugNumber(int32_t val, FontStyle fontStyle);
   static void drawHex(uint32_t x, FontStyle fontStyle, uint8_t digits);
   static void drawSymbol(uint8_t symbolID);                                                           // Used for drawing symbols of a predictable width
