@@ -79,6 +79,12 @@
 #define BUZZER_VOLUME 0 // Range: 0 - 20
 
 /**
+ * Button backlight <- ->
+ * 
+ */
+#define BUTTON_BACKLIGHT 0  // 0: Disabled, 1: Enabled (looks odd, leaks under OK button)
+
+/**
  * Temp change settings
  */
 #define TEMP_CHANGE_SHORT_STEP     1  // Default temp change short step +1
