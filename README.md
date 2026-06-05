@@ -52,7 +52,7 @@ The links in the table below allow to download available builds directly:
 
 |        Device         | Stable Release |
 |:---------------------:|:--------------:|
-| FNIRSI HS-02          | [HS02.zip](https://github.com/ok2cm/IronOS/releases/download/v1.0/HS02.zip) |
+| FNIRSI HS-02          | [HS02.zip](https://github.com/ok2cm/IronOS/releases/download/v1.00/HS02.zip) |
 
 [^changelog]:
 
