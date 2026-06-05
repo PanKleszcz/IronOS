@@ -79,25 +79,21 @@ void startPIDTask(void const *argument __unused) {
     // This is a call to block this thread until the ADC does its samples
     if (ulTaskNotifyTake(pdTRUE, TICKS_SECOND * 2)) {
       // Do the reading here to keep the temp calculations churning along
-      TemperatureType_t currentTipTempInC = TipThermoModel::getTipInC(true);
+      TemperatureType_t currentTipTempInCx10 = TipThermoModel::getTipInCx10(true);
 
       PIDTempTarget = currentTempTargetDegC;
-      if (PIDTempTarget > 0) {
-        // Cap the max set point to 450C
-        if (PIDTempTarget > 450) {
-          // Maximum allowed output
-          PIDTempTarget = 450;
-        }
-        // Safety check that not aiming higher than current tip can measure
-        if (PIDTempTarget > TipThermoModel::getTipMaxInC()) {
-          PIDTempTarget = TipThermoModel::getTipMaxInC();
-        }
-
-        x10WattsOut = getPIDResultX10Watts(PIDTempTarget, currentTipTempInC);
-        detectThermalRunaway(currentTipTempInC, x10WattsOut);
-      } else {
-        detectThermalRunaway(currentTipTempInC, 0);
+      // Cap the max set point to 450C
+      if (PIDTempTarget > 450) {
+        // Maximum allowed output
+        PIDTempTarget = 450;
       }
+      // Safety check that not aiming higher than current tip can measure
+      if (PIDTempTarget > TipThermoModel::getTipMaxInC()) {
+        PIDTempTarget = TipThermoModel::getTipMaxInC();
+      }
+
+      x10WattsOut = getPIDResultX10Watts(PIDTempTarget, currentTipTempInCx10);
+      detectThermalRunaway(currentTipTempInCx10/10, PIDTempTarget > 0 ? x10WattsOut : 0);
       setOutputx10WattsViaFilters(x10WattsOut);
     } else {
       // ADC interrupt timeout
@@ -115,7 +111,7 @@ void startPIDTask(void const *argument __unused) {
   }
 }
 
-#ifdef TIP_CONTROL_PID
+#if defined (TIP_CONTROL_PID)
 template <class T, T Kp, T Ki, T Kd, T integral_limit_scale> struct PID {
   T previous_error_term;
   T integration_running_sum;
@@ -159,7 +155,55 @@ template <class T, T Kp, T Ki, T Kd, T integral_limit_scale> struct PID {
     // Save target_delta to previous target_delta
     previous_error_term = target_delta;
 
+    // Make sure that output is disabled
+    if (set_point < MIN_TEMP_C) {
+      output = 0;
+    }
+
     return output;
+  }
+};
+#elif defined(TIP_CONTROL_ARDC1)
+template <class T> struct ARDC1 {
+  T xe[2] = {0, 0};
+  T output = 0;
+  T prev_delta = 0;
+
+  int32_t update(const T set_point, const T new_reading, const T interval, const T max_output) {
+
+    // Configuration
+    const T A[] = TIP_ARDC1_A;
+    const T B[] = TIP_ARDC1_B;
+    const T Kp = TIP_ARDC1_Kp;
+    const T Kd = TIP_ARDC1_Kd;
+    const T b0 = TIP_ARDC1_b0;
+
+    //// Observer
+    // xe = A*xe + B*[output; new_reading];
+    const T tmp_xe[] = {A[0]*xe[0] + A[1]*xe[1] + B[0]*output + B[1]*new_reading,
+                        A[2]*xe[0] + A[3]*xe[1] + B[2]*output + B[3]*new_reading};
+    xe[0] = tmp_xe[0];
+    xe[1] = tmp_xe[1];
+
+    const T delta = set_point - xe[0];
+
+    if (set_point < MIN_TEMP_C) {
+      output = 0;
+    } else {
+      const T u0 = Kp*delta + Kd*(delta - prev_delta)/interval;
+      // const T u0 = Kp*delta + Kd*dd;
+      output = (u0 - xe[1])/b0;
+
+      // Restrict output to max / 0
+      if (output > max_output)
+        output = max_output;
+      else if (output < 0)
+        output = 0;
+    }
+
+    prev_delta = delta;
+
+    return (int32_t)output;
   }
 };
 #else
@@ -192,16 +236,20 @@ template <class T = TemperatureType_t> struct Integrator {
 int32_t getPIDResultX10Watts(TemperatureType_t set_point, TemperatureType_t current_reading) {
   static TickType_t lastCall = 0;
 
-#ifdef TIP_CONTROL_PID
-  static PID<TemperatureType_t, TIP_PID_KP, TIP_PID_KI, TIP_PID_KD, 5> pid = {0, 0};
+#if defined(TIP_CONTROL_PID)
+  static PID<TemperatureType_t, TIP_PID_KP, TIP_PID_KI, TIP_PID_KD, 5> ctrl = {0, 0};
+  const TickType_t interval = (xTaskGetTickCount() - lastCall);
 
+#elif defined(TIP_CONTROL_ARDC1)
+  static ARDC1<float> ctrl = {};
   const TickType_t interval = (xTaskGetTickCount() - lastCall);
 
 #else
-  static Integrator<TemperatureType_t> powerStore = {0};
+  static Integrator<TemperatureType_t> ctrl = {0};
   const TickType_t                     rate       = TICKS_SECOND / (xTaskGetTickCount() - lastCall);
 #endif
   lastCall = xTaskGetTickCount();
+#if defined(TIP_CONTROL_PID)
   // Sandman note:
   // PID Challenge - we have a small thermal mass that we to want heat up as fast as possible but we don't
   // want to overshot excessively (if at all) the set point temperature. In the same time we have 'imprecise'
@@ -224,14 +272,15 @@ int32_t getPIDResultX10Watts(TemperatureType_t set_point, TemperatureType_t curr
   // Note on powerStore. On update, if the value is provided in X10 (W) units then inertia shall be provided
   // in X10 (J / °C) units as well.
 
-#ifdef TIP_CONTROL_PID
-  return pid.update(set_point, current_reading, interval, getX10WattageLimits());
+  return ctrl.update(set_point, current_reading/10, interval, getX10WattageLimits());
+#elif defined(TIP_CONTROL_ARDC1)
+  return ctrl.update(set_point, current_reading/10.0f, interval/1000.0f, getX10WattageLimits());
 #else
-  return powerStore.update(((TemperatureType_t)getTipThermalMass()) * (set_point - current_reading), // the required power
-                           getTipInertia(),                                                          // Inertia, smaller numbers increase dominance of the previous value
-                           2,                                                                        // gain
-                           rate,                                                                     // PID cycle frequency
-                           getX10WattageLimits());
+  return ctrl.update(((TemperatureType_t)getTipThermalMass()) * (set_point - current_reading/10), // the required power
+                        getTipInertia(),                                                          // Inertia, smaller numbers increase dominance of the previous value
+                        2,                                                                        // gain
+                        rate,                                                                     // PID cycle frequency
+                        getX10WattageLimits());
 #endif
 }
 

@@ -56,6 +56,7 @@ uint32_t          TipThermoModel::convertTipRawADCTouV(uint16_t rawADC, bool ski
 }
 
 TemperatureType_t TipThermoModel::convertTipRawADCToDegC(uint16_t rawADC) { return convertuVToDegC(convertTipRawADCTouV(rawADC)); }
+TemperatureType_t TipThermoModel::convertTipRawADCToDegCx10(uint16_t rawADC) { return convertuVToDegCx10(convertTipRawADCTouV(rawADC)); }
 TemperatureType_t TipThermoModel::convertTipRawADCToDegF(uint16_t rawADC) { return convertuVToDegF(convertTipRawADCTouV(rawADC)); }
 
 TemperatureType_t TipThermoModel::convertuVToDegF(uint32_t tipuVDelta) { return convertCtoF(convertuVToDegC(tipuVDelta)); }
@@ -72,14 +73,20 @@ TemperatureType_t TipThermoModel::convertFtoC(TemperatureType_t degF) {
   }
   return ((degF - 32) * 5) / 9;
 }
-TemperatureType_t TipThermoModel::getTipInC(bool sampleNow) {
-  TemperatureType_t currentTipTempInC = TipThermoModel::convertTipRawADCToDegC(getTipRawTemp(sampleNow));
-  currentTipTempInC += getHandleTemperature(sampleNow) / 10; // Add handle offset
 
-  if (currentTipTempInC < 0) {
+TemperatureType_t TipThermoModel::getTipInC(bool sampleNow) {
+  
+  return getTipInCx10(sampleNow)/10;
+}
+
+TemperatureType_t TipThermoModel::getTipInCx10(bool sampleNow) {
+  TemperatureType_t currentTipTempInCx10 = TipThermoModel::convertTipRawADCToDegCx10(getTipRawTemp(sampleNow));
+  currentTipTempInCx10 += getHandleTemperature(sampleNow); // Add handle offset
+
+  if (currentTipTempInCx10 < 0) {
     return 0;
   }
-  return currentTipTempInC;
+  return currentTipTempInCx10;
 }
 
 TemperatureType_t TipThermoModel::getTipInF(bool sampleNow) {

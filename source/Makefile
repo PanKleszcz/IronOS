@@ -324,7 +324,8 @@ DEV_CFLAGS=-D VECT_TAB_OFFSET=$(bootldr_size)U -g
 DEV_CXXFLAGS=-g
 CPUFLAGS=-mcpu=cortex-m4  \
          -mthumb          \
-         -mfloat-abi=softfp
+				 -mfpu=fpv4-sp-d16 \
+         -mfloat-abi=hard
 
 CUSTOM_FORMAT_CMD=$(HOST_PYTHON) ${DEVICE_BSP_DIR}/Scripts/add_header.py bin
 
