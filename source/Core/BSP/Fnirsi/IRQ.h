@@ -18,7 +18,7 @@ extern "C" {
 // void HAL_GPIO_EXTI_Callback(uint16_t);
 
 
-void TIM2_IRQHandler(void);
+void TIM4_IRQHandler(void);
 void ADC_IRQHandler(void);
 void SysTick_Handler(void);
 

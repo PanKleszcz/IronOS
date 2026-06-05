@@ -24,7 +24,7 @@ volatile uint8_t  pendingPWM     = 0;
 const uint16_t        powerPWM         = 395;                                        // pulse when TIM1 output power is enabled
 static const uint16_t holdoffTicks     = 4;                                          // holdoff after TIM1 power pulse
 static const uint16_t tempMeasureTicks = 1;                                          // measurement period
-uint16_t              totalPWM         = powerPWM + tempMeasureTicks + holdoffTicks; // TIM2 init period, the full PWM cycle
+uint16_t              totalPWM         = powerPWM + tempMeasureTicks + holdoffTicks; // TIM4 init period, the full PWM cycle
 
 uint16_t ADCReadings[ADC_SAMPLES]; // Used to store the adc readings for the handle cold junction temp
 
@@ -91,17 +91,17 @@ uint16_t getTipRawTemp(uint8_t sample) {
 static void switchToFastPWM(void) {
   // 20Hz, no slow PWM available
   totalPWM     = powerPWM + tempMeasureTicks + holdoffTicks;
-  TIM2->AR     = totalPWM - 1;
-  TIM2->CCDAT1 = powerPWM + holdoffTicks - 1;
-  TIM2->CCDAT4 = powerPWM - 1;
-  TIM2->PSC    = 3999; // 8kHz -> 125uS per tick
+  TIM4->AR     = totalPWM - 1;
+  TIM4->CCDAT1 = powerPWM + holdoffTicks - 1;
+  TIM4->CCDAT4 = powerPWM - 1;
+  TIM4->PSC    = 3999; // 8kHz -> 125uS per tick
 }
 
 void setTipPWM(const uint8_t pulse, const bool shouldUseFastModePWM) {
   PWMSafetyTimer = 20; // This is decremented in the handler for PWM so that the tip pwm is
                        // disabled if the PID task is not scheduled often enough.
 
-  uint16_t scaledPWM = (uint16_t)pulse * TIM1->AR / TIM2->CCDAT4; // We need to scale pulse from powerPWM to TIM1 period (394 -> 127)
+  uint16_t scaledPWM = (uint16_t)pulse * TIM1->AR / TIM4->CCDAT4; // We need to scale pulse from powerPWM to TIM1 period (394 -> 127)
   pendingPWM         = scaledPWM;
 }
 
@@ -133,9 +133,14 @@ bool          isTipDisconnected() {
 void setStatusLED(const enum StatusLED state) {
   // TODO: Add a nice visual feature to LCD
 }
+
 void setBuzzer(bool on) {
-  // TODO: Use channel3 of TIM1 to control brightness
+  // 63 = 50% duty cycle -> too lound and too much current
+  // 20 = 16% duty cycle -> max reasonable
+  static_assert(BUZZER_VOLUME < 20);
+  TIM_SetCmp1(TIM2, on ? BUZZER_VOLUME : 0);
 }
+
 #ifdef TIP_RESISTANCE_SENSE_Pin
 // We want to calculate lastTipResistance
 // If tip is connected, and the tip is cold and the tip is not being heated
