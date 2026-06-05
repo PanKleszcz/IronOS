@@ -3,7 +3,6 @@
 
 OperatingMode gui_solderingTempAdjust(const ButtonState buttonIn, guiContext *cxt) {
 
-  currentTempTargetDegC              = 0; // Turn off heater while adjusting temp
   uint16_t   *waitForRelease         = &(cxt->scratch_state.state1);
   uint32_t   *autoRepeatTimer        = &(cxt->scratch_state.state3);
   uint16_t   *autoRepeatAcceleration = &(cxt->scratch_state.state2);
