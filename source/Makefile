@@ -315,7 +315,7 @@ DEV_GLOBAL_DEFS=-D N32L40X              \
 DEV_LDFLAGS=-Wl,--wrap=printf  -Wl,--no-wchar-size-warning
 DEV_AFLAGS=
 # remove for release
-swd_enable=1
+# swd_enable=1
 DEV_CFLAGS=-D VECT_TAB_OFFSET=$(bootldr_size)U -g
 DEV_CXXFLAGS=-g
 CPUFLAGS=-mcpu=cortex-m4  \
