@@ -79,7 +79,7 @@ void startPIDTask(void const *argument __unused) {
     // This is a call to block this thread until the ADC does its samples
     if (ulTaskNotifyTake(pdTRUE, TICKS_SECOND * 2)) {
       // Do the reading here to keep the temp calculations churning along
-      TemperatureType_t currentTipTempInC = TipThermoModel::getTipInC(true);
+      TemperatureType_t currentTipTempInCx10 = TipThermoModel::getTipInCx10(true);
 
       PIDTempTarget = currentTempTargetDegC;
       if (PIDTempTarget > 0) {
@@ -93,10 +93,10 @@ void startPIDTask(void const *argument __unused) {
           PIDTempTarget = TipThermoModel::getTipMaxInC();
         }
 
-        x10WattsOut = getPIDResultX10Watts(PIDTempTarget, currentTipTempInC);
-        detectThermalRunaway(currentTipTempInC, x10WattsOut);
+        x10WattsOut = getPIDResultX10Watts(PIDTempTarget, currentTipTempInCx10);
+        detectThermalRunaway(currentTipTempInCx10/10, x10WattsOut);
       } else {
-        detectThermalRunaway(currentTipTempInC, 0);
+        detectThermalRunaway(currentTipTempInCx10/10, 0);
       }
       setOutputx10WattsViaFilters(x10WattsOut);
     } else {
@@ -225,9 +225,9 @@ int32_t getPIDResultX10Watts(TemperatureType_t set_point, TemperatureType_t curr
   // in X10 (J / °C) units as well.
 
 #ifdef TIP_CONTROL_PID
-  return pid.update(set_point, current_reading, interval, getX10WattageLimits());
+  return pid.update(set_point, current_reading/10, interval, getX10WattageLimits());
 #else
-  return powerStore.update(((TemperatureType_t)getTipThermalMass()) * (set_point - current_reading), // the required power
+  return powerStore.update(((TemperatureType_t)getTipThermalMass()) * (set_point - current_reading/10), // the required power
                            getTipInertia(),                                                          // Inertia, smaller numbers increase dominance of the previous value
                            2,                                                                        // gain
                            rate,                                                                     // PID cycle frequency
