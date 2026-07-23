@@ -251,7 +251,7 @@ uint16_t getInputVoltageX10(uint16_t divisor, uint8_t sample) {
   }
   return sum * 4 / divisor;
 }
-void setTipPWM(const uint8_t pulse, const bool shouldUseFastModePWM) {
+void setTipPWM(const uint16_t pulse, const bool shouldUseFastModePWM) {
   // We can just set the timer directly
   if (htim3.Instance->PSC > 20) {
     htim3.Instance->CCR1 = 0;

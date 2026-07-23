@@ -157,7 +157,7 @@ void switchToSlowPWM(void) {
   BL_WR_REG(TIMER_BASE, TIMER_TCDR, tmpVal);
 }
 
-void setTipPWM(const uint8_t pulse, const bool shouldUseFastModePWM) {
+void setTipPWM(const uint16_t pulse, const bool shouldUseFastModePWM) {
   PWMSafetyTimer = 10;
   // This is decremented in the handler for PWM so that the tip pwm is
   // disabled if the PID task is not scheduled often enough.
