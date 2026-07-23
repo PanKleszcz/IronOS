@@ -183,7 +183,7 @@
 /// Use PID Control
 #define TIP_CONTROL_PID
 #define TIP_PID_KP              40   // Matches proven Pinecilv2 value; higher drive under load
-#define TIP_PID_KI              300  // Integral climb rate is proportional to error; 300 closes a small (2-3C) load-induced droop in ~10-20s. Watch for slow hunting around the set point if raised further
+#define TIP_PID_KI              700  // Integral climb rate is proportional to error; 700 closes a small (2-3C) load-induced droop in ~10s. Far above the Pinecilv2 reference value (6) -- this is empirically tuned, not derived; watch for slow hunting, especially as the integral bleeds off after a heavy solder joint
 #define TIP_PID_KD              8000 // C245 has a surprisingly high inertia, needs lot of dampening
 #define TIP_PID_INTEGRAL_LIMIT_SCALE 30 // Default 5 caps integral at ~4.9W; 30 (~29W) covers measured heavy-load losses (XT60 at 430C draws 15-18W)
 
