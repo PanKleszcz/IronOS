@@ -48,23 +48,24 @@ void loadFactoryCal() {
   if (page[0] == 0xFFFFFFFF) {
     return; // Erased page; stock firmware never ran / settings wiped
   }
-  // Units that never received a per-unit factory calibration carry the 0x8000
-  // placeholder in all three words (decoding to 223/393/572). Verified on real
-  // hardware that the resulting default curve over-reads such units by 25-30%,
-  // so placeholders must be rejected in favour of the measured fallback slope.
-  if ((page[0x16] & 0xFFFF) == 0x8000 && (page[0x17] & 0xFFFF) == 0x8000 && (page[0x18] & 0xFFFF) == 0x8000) {
-    return;
-  }
   const int32_t a140 = (int32_t)(page[0x16] & 0xFFFF) - (int32_t)stockCalBias140;
   const int32_t a240 = (int32_t)(page[0x17] & 0xFFFF) - (int32_t)stockCalBias240;
   const int32_t a340 = (int32_t)(page[0x18] & 0xFFFF) - (int32_t)stockCalBias340;
+  // Always expose the decoded counts for the debug menu, even when rejected below.
+  adcCount140 = (a140 > 0) ? (uint32_t)a140 : 0;
+  adcCount240 = (a240 > 0) ? (uint32_t)a240 : 0;
+  adcCount340 = (a340 > 0) ? (uint32_t)a340 : 0;
+  // Units that never received a calibration carry the 0x8000 neutral placeholder
+  // in all three words (decoding to 223/393/572). Verified on real hardware that
+  // the resulting nominal curve over-reads such units by 25-30%, so placeholders
+  // must be rejected in favour of the measured fallback slope.
+  if ((page[0x16] & 0xFFFF) == 0x8000 && (page[0x17] & 0xFFFF) == 0x8000 && (page[0x18] & 0xFFFF) == 0x8000) {
+    return;
+  }
   // Sanity: counts must be positive, strictly increasing and within the 12-bit range.
   if (a140 < 50 || a240 <= a140 || a340 <= a240 || a340 > 1500) {
     return;
   }
-  adcCount140     = (uint32_t)a140;
-  adcCount240     = (uint32_t)a240;
-  adcCount340     = (uint32_t)a340;
   factoryCalValid = true;
 }
 } // namespace

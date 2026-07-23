@@ -95,6 +95,29 @@ void ui_draw_debug_menu(const uint8_t item_number) {
     }
     Display::printNumber(hallEffectStrength, 6, FontStyle::SMALL);
   } break;
+#else
+  case 16: // HS-02 factory tip calibration readout
+  {
+    // Fnirsi BSP: three stock calibration ADC counts (140C/240C/340C reference
+    // points) decoded from the stock settings page; see Core/BSP/Fnirsi/ThermoModel.cpp.
+    // "In Use" means the piecewise curve built from them drives the tip readout;
+    // "Unused 26uV/C" means they were absent/neutral placeholders and the measured
+    // constant-slope fallback is active instead.
+    extern bool hs02GetFactoryTipCal(uint32_t &a140, uint32_t &a240, uint32_t &a340);
+    uint32_t    a140, a240, a340;
+    const bool  calValid = hs02GetFactoryTipCal(a140, a240, a340);
+    Display::clearScreen();
+    Display::setCursor(0, 0);
+    Display::print(SmallSymbolTipCal, FontStyle::SMALL); // "Tip Cal"
+    Display::setCursor(0, 24);
+    Display::printNumber(a140, 3, FontStyle::SMALL, true);
+    Display::print(SmallSymbolSpace, FontStyle::SMALL);
+    Display::printNumber(a240, 3, FontStyle::SMALL, true);
+    Display::print(SmallSymbolSpace, FontStyle::SMALL);
+    Display::printNumber(a340, 4, FontStyle::SMALL, true);
+    Display::setCursor(0, 48);
+    Display::print(calValid ? SmallSymbolTipCalInUse : SmallSymbolTipCalUnused, FontStyle::SMALL);
+  } break;
 #endif
 
   default:

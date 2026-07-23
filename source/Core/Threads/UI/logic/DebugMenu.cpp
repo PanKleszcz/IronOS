@@ -10,7 +10,8 @@ OperatingMode showDebugMenu(const ButtonState buttons, guiContext *cxt) {
     return OperatingMode::HomeScreen;
   } else if (buttons == BUTTON_F_SHORT) {
     cxt->scratch_state.state1++;
-#ifdef HALL_SENSOR
+#if defined(HALL_SENSOR) || defined(LCD_160x80)
+    // Item 16: Hall sensor reading, or the HS-02 factory tip-cal readout on the colour UI
     cxt->scratch_state.state1 = cxt->scratch_state.state1 % 17;
 #else
     cxt->scratch_state.state1 = cxt->scratch_state.state1 % 16;

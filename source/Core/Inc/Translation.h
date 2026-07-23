@@ -44,6 +44,9 @@ extern const char *SmallSymbolCellCount;
 //
 extern const char *SmallSymbolVersionNumber;
 extern const char *SmallSymbolPDDebug;
+extern const char *SmallSymbolTipCal;
+extern const char *SmallSymbolTipCalInUse;
+extern const char *SmallSymbolTipCalUnused;
 extern const char *SmallSymbolState;
 extern const char *SmallSymbolNoVBus;
 extern const char *SmallSymbolVBus;
