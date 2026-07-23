@@ -22,6 +22,8 @@ OperatingMode gui_solderingTempAdjust(const ButtonState buttonIn, guiContext *cx
     // stay
     (*autoRepeatAcceleration) = 0;
     break;
+  case BUTTON_OK_SHORT: // Dedicated OK button confirms & exits (same as both-press)
+  case BUTTON_OK_LONG:  // OK long-press also exits (back to previous screen)
   case BUTTON_BOTH:
     // exit
     saveSettings();

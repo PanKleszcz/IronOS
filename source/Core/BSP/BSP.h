@@ -48,6 +48,9 @@ uint16_t getInputVoltageX10(uint16_t divisor, uint8_t sample);
 // !! Returns 1 if held down, 0 if released
 uint8_t getButtonA();
 uint8_t getButtonB();
+// Optional dedicated OK button for 3-button devices (e.g. Fnirsi HS-02).
+// Weakly defined to return 0 in Buttons.cpp; devices with a third button override it.
+uint8_t getButtonOK();
 
 // This is a work around that will be called if I2C starts to bug out
 // This should toggle the SCL line until SDA goes high to end the current transaction

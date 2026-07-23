@@ -11,6 +11,9 @@
 #include <Buttons.hpp>
 TickType_t lastButtonTime = 0;
 
+// Devices without a dedicated OK button fall back to this (no third button).
+__attribute__((weak)) uint8_t getButtonOK() { return 0; }
+
 ButtonState getButtonState() {
   /*
    * Read in the buttons and then determine if a state change needs to occur
@@ -25,11 +28,13 @@ ButtonState getButtonState() {
    */
   static uint8_t    previousState       = 0;
   static bool       longPressed         = false;
+  static bool       okLongFired         = false; // OK long-press is one-shot (back = single level)
   static TickType_t previousStateChange = 0;
   const TickType_t  timeout             = TICKS_100MS * 4;
   uint8_t           currentState;
   currentState = (getButtonA()) << 0;
   currentState |= (getButtonB()) << 1;
+  currentState |= (getButtonOK()) << 2; // Dedicated OK button (0 on 2-button devices)
 
   if (currentState) {
     lastButtonTime = xTaskGetTickCount();
@@ -46,6 +51,14 @@ ButtonState getButtonState() {
         return BUTTON_F_LONG;
       } else if (currentState == 0x02) {
         return BUTTON_B_LONG;
+      } else if (currentState == 0x04) {
+        // Dedicated OK button held: emit BUTTON_OK_LONG only once per hold so a
+        // "back one level" action doesn't cascade up multiple levels while held.
+        if (okLongFired) {
+          return BUTTON_NONE;
+        }
+        okLongFired = true;
+        return BUTTON_OK_LONG;
       } else {
         return BUTTON_BOTH_LONG; // Both being held case
       }
@@ -73,12 +86,15 @@ ButtonState getButtonState() {
           retVal = BUTTON_F_SHORT;
         } else if (previousState == 0x02) {
           retVal = BUTTON_B_SHORT;
+        } else if (previousState == 0x04) {
+          retVal = BUTTON_OK_SHORT; // Dedicated OK button pressed
         } else {
           retVal = BUTTON_BOTH; // Both being held case
         }
       }
       previousState = 0;
       longPressed   = false;
+      okLongFired   = false; // reset one-shot latch on release
     }
     previousStateChange = xTaskGetTickCount();
     return retVal;

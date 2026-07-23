@@ -107,8 +107,12 @@ void setTipPWM(const uint8_t pulse, const bool shouldUseFastModePWM) {
   pendingPWM         = scaledPWM;
 }
 
+// The HS-02 has three physical buttons; IronOS's two logical buttons map to UP/DOWN,
+// and the dedicated OK button is exposed via getButtonOK() so each UI screen can give
+// it a context-appropriate action (see the BUTTON_OK_SHORT handlers in the UI logic).
 uint8_t getButtonA() { return GPIO_ReadInputDataBit(BUTTON_Port, BUTTON_DOWN_Pin) == Bit_RESET ? 1 : 0; }
 uint8_t getButtonB() { return GPIO_ReadInputDataBit(BUTTON_Port, BUTTON_UP_Pin) == Bit_RESET ? 1 : 0; }
+uint8_t getButtonOK() { return GPIO_ReadInputDataBit(BUTTON_Port, BUTTON_OK_Pin) == Bit_RESET ? 1 : 0; }
 
 void BSPInit(void) { switchToFastPWM(); }
 

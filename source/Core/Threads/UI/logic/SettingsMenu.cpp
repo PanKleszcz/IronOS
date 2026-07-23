@@ -213,6 +213,12 @@ OperatingMode gui_SettingsMenu(const ButtonState buttons, guiContext *cxt) {
   case BUTTON_B_SHORT:
     buttonPress = swapButtonSettings ? BUTTON_F_SHORT : BUTTON_B_SHORT;
     break;
+  case BUTTON_OK_SHORT:
+    buttonPress = BUTTON_F_SHORT; // Dedicated OK button selects/enters, ignoring button swap
+    break;
+  case BUTTON_OK_LONG:
+    buttonPress = BUTTON_BOTH; // OK long-press goes back one level (submenu -> root -> home)
+    break;
   default:
     buttonPress = buttons;
     break;
