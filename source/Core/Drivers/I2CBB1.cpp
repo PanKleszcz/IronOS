@@ -11,6 +11,7 @@
 SemaphoreHandle_t I2CBB1::I2CSemaphore = NULL;
 StaticSemaphore_t I2CBB1::xSemaphoreBuffer;
 void              I2CBB1::init() {
+#ifndef MODEL_HS02
   // Set GPIO's to output open drain
   GPIO_InitTypeDef GPIO_InitStruct;
   __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -25,6 +26,7 @@ void              I2CBB1::init() {
   GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull  = GPIO_PULLUP;
   HAL_GPIO_Init(SCL_GPIO_Port, &GPIO_InitStruct);
+#endif
   SOFT_SDA1_HIGH();
   SOFT_SCL1_HIGH();
   // To ensure bus is unlocked; we toggle the Clock a bunch of times to make things error out

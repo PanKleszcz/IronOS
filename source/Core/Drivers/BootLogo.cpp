@@ -1,7 +1,7 @@
 #include "BootLogo.h"
 #include "BSP.h"
 #include "Buttons.hpp"
-#include "OLED.hpp"
+#include "Display.hpp"
 #include "Settings.h"
 #include "cmsis_os.h"
 
@@ -16,7 +16,7 @@ void delay() {
 }
 
 void BootLogo::handleShowingLogo(const uint8_t *ptrLogoArea) {
-  OLED::clearScreen();
+  Display::clearScreen();
   // Read the first few bytes and figure out what format we are looking at
   if (OLD_LOGO_HEADER_VALUE == *(reinterpret_cast<const uint32_t *>(ptrLogoArea))) {
     showOldFormat(ptrLogoArea);
@@ -24,19 +24,19 @@ void BootLogo::handleShowingLogo(const uint8_t *ptrLogoArea) {
     showNewFormat(ptrLogoArea + 1);
   }
 
-  OLED::clearScreen();
+  Display::clearScreen();
 }
 
 void BootLogo::showOldFormat(const uint8_t *ptrLogoArea) {
 #ifdef OLED_128x32
   // Draw in middle
-  OLED::drawAreaSwapped(16, 8, 96, 16, (uint8_t *)(ptrLogoArea + 4));
+  Display::drawAreaSwapped(16, 8, 96, 16, (uint8_t *)(ptrLogoArea + 4));
 
 #else
-  OLED::drawAreaSwapped(0, 0, 96, 16, (uint8_t *)(ptrLogoArea + 4));
+  Display::drawAreaSwapped(0, 0, 96, 16, (uint8_t *)(ptrLogoArea + 4));
 
 #endif
-  OLED::refresh();
+  Display::refresh();
   // Delay here with static logo until a button is pressed or its been the amount of seconds set by the user
   delay();
 }
@@ -48,13 +48,13 @@ void BootLogo::showNewFormat(const uint8_t *ptrLogoArea) {
 
   // New logo format (a) fixes long standing byte swap quirk and (b) supports animation
   uint8_t interFrameDelay = ptrLogoArea[0];
-  OLED::clearScreen();
+  Display::clearScreen();
 
   // Now draw in the frames
   int position = 1;
   while (getButtonState() == BUTTON_NONE) {
     int len = (showNewFrame(ptrLogoArea + position));
-    OLED::refresh();
+    Display::refresh();
     position += len;
 
     if (interFrameDelay) {
@@ -67,7 +67,7 @@ void BootLogo::showNewFormat(const uint8_t *ptrLogoArea) {
       if (getSettingValue(SettingsOptions::LOGOTime) == logoMode_t::INFINITY) {
         // ... but if it's infinite logo setting then keep it rolling over again until a button is pressed
         osDelay(4 * TICKS_100MS);
-        OLED::clearScreen();
+        Display::clearScreen();
         position = 1;
         continue;
       }
@@ -95,9 +95,9 @@ int BootLogo::showNewFrame(const uint8_t *ptrLogoArea) {
   case 0xFF:
 // Full frame update
 #ifdef OLED_128x32
-    OLED::drawArea(16, 8, 96, 16, ptrLogoArea + 1);
+    Display::drawArea(16, 8, 96, 16, ptrLogoArea + 1);
 #else
-    OLED::drawArea(0, 0, 96, 16, ptrLogoArea + 1);
+    Display::drawArea(0, 0, 96, 16, ptrLogoArea + 1);
 #endif
     length = 96;
     break;
@@ -108,13 +108,13 @@ int BootLogo::showNewFrame(const uint8_t *ptrLogoArea) {
       uint8_t index = ptrLogoArea[1 + (p * 2)];
       uint8_t value = ptrLogoArea[2 + (p * 2)];
 #ifdef OLED_128x32
-      OLED::drawArea(16 + (index % 96), index >= 96 ? 16 : 8, 1, 8, &value);
+      Display::drawArea(16 + (index % 96), index >= 96 ? 16 : 8, 1, 8, &value);
 #else
-      OLED::drawArea(index % 96, index >= 96 ? 8 : 0, 1, 8, &value);
+      Display::drawArea(index % 96, index >= 96 ? 8 : 0, 1, 8, &value);
 #endif
     }
   }
 
-  OLED::refresh();
+  Display::refresh();
   return (length * 2) + 1;
 }

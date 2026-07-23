@@ -7,7 +7,8 @@ ALL_PINECIL_MODELS=Pinecil
 ALL_PINECIL_V2_MODELS=Pinecilv2
 ALL_MHP30_MODELS=MHP30
 ALL_SEQURE_MODELS=S60 S60P T55
-ALL_MODELS=$(ALL_MINIWARE_MODELS) $(ALL_PINECIL_MODELS) $(ALL_MHP30_MODELS) $(ALL_PINECIL_V2_MODELS) $(ALL_SEQURE_MODELS)
+ALL_FNIRSI_MODELS=HS02
+ALL_MODELS=$(ALL_MINIWARE_MODELS) $(ALL_PINECIL_MODELS) $(ALL_MHP30_MODELS) $(ALL_PINECIL_V2_MODELS) $(ALL_SEQURE_MODELS) $(ALL_FNIRSI_MODELS)
 
 ifneq ($(model),$(filter $(model),$(ALL_MODELS)))
 $(error Invalid model '$(model)', valid options are: $(ALL_MODELS))
@@ -38,6 +39,10 @@ LANGUAGE_GROUP_EUR_LANGS=EN $(filter-out $(LANGUAGE_GROUP_CJK_LANGS) $(LANGUAGE_
 LANGUAGE_GROUP_EUR_NAME=European
 
 LANGUAGE_GROUPS=CUSTOM CJK CYRILLIC EUR
+
+# Default fonts
+SMALL_FONT=default_6x8
+LARGE_FONT=default_12x16
 
 # Define for host Python
 ifndef HOST_PYTHON
@@ -145,7 +150,7 @@ flash_size=62k
 ifeq ($(model), S60P)
 bootldr_size=0x5000
 DEVICE_DFU_ADDRESS=0x08005000
-else 
+else
 # S60 or T55
 bootldr_size=0x4400
 DEVICE_DFU_ADDRESS=0x08004400
@@ -294,6 +299,41 @@ bootldr_size=0x0
 
 endif # ALL_PINECIL_V2_MODELS
 
+ifeq ($(model),$(filter $(model),$(ALL_FNIRSI_MODELS)))
+$(info Building for Fnirsi )
+DEVICE_BSP_DIR=./Core/BSP/Fnirsi
+LDSCRIPT=${DEVICE_BSP_DIR}/Scripts/n32l403_flash_user.ld
+
+flash_size=104k
+bootldr_size=0x5800
+
+DEV_GLOBAL_DEFS=-D N32L40X              \
+                -D USE_STDPERIPH_DRIVER \
+                -D SYSCLK_SRC=SYSCLK_USE_HSI_PLL   \
+                -D SYSCLK_FREQ=64000000 \
+                -D USE_RTOS_SYSTICK     \
+                -D GCC_ARMCM4F          \
+                -D ARM_MATH_CM4         \
+                -finline-limit=9999999
+
+DEV_LDFLAGS=-Wl,--wrap=printf  -Wl,--no-wchar-size-warning
+DEV_AFLAGS=
+# remove for release
+# swd_enable=1
+DEV_CFLAGS=-D VECT_TAB_OFFSET=$(bootldr_size)U -g
+DEV_CXXFLAGS=-g
+CPUFLAGS=-mcpu=cortex-m4  \
+         -mthumb          \
+				 -mfpu=fpv4-sp-d16 \
+         -mfloat-abi=hard
+
+CUSTOM_FORMAT_CMD=$(HOST_PYTHON) ${DEVICE_BSP_DIR}/Scripts/add_header.py bin
+
+SMALL_FONT=default_12x16
+LARGE_FONT=default_24x32
+
+endif # ALL_FNIRSI_MODELS
+
 DEVICE_BSP_INCLUDE_DIRS:= ${shell find ${DEVICE_BSP_DIR} -type d -print}
 THREADS_INCLUDE_DIRS:= ${shell find ${THREADS_DIR} -type d -print}
 DRIVERS_INCLUDE_DIRS:= ${shell find ${DRIVERS_DIR} -type d -print}
@@ -376,7 +416,7 @@ COMPILER=gcc
 # arm-none-eabi is the general ARM compiler
 # riscv-none-embed is the riscv compiler
 # riscv-nuclei-elf is the nuclei tuned one for their cores
-ifeq ($(model),$(filter $(model),$(ALL_MINIWARE_MODELS) $(ALL_MHP30_MODELS)))
+ifeq ($(model),$(filter $(model),$(ALL_MINIWARE_MODELS) $(ALL_MHP30_MODELS) $(ALL_FNIRSI_MODELS)))
 COMPILER_PREFIX=arm-none-eabi
 endif
 ifeq ($(model),$(filter $(model),$(ALL_SEQURE_MODELS) ))
@@ -483,7 +523,7 @@ OUT_OBJS_S=$(addprefix $(OUTPUT_DIR)/,$(OBJS_S))
 
 default: firmware-EN
 
-firmware-%: $(HEXFILE_DIR)/$(model)_%.hex $(HEXFILE_DIR)/$(model)_%.bin $(HEXFILE_DIR)/$(model)_%.dfu
+firmware-%: $(HEXFILE_DIR)/$(model)_%.hex $(HEXFILE_DIR)/$(model)_%.bin $(HEXFILE_DIR)/$(model)_%.dfu $(HEXFILE_DIR)/$(model)_%.custom
 	@true
 
 # Targets for binary files
@@ -497,6 +537,13 @@ firmware-%: $(HEXFILE_DIR)/$(model)_%.hex $(HEXFILE_DIR)/$(model)_%.bin $(HEXFIL
 
 %.dfu: %.bin Makefile
 	$(HOST_PYTHON) dfuse-pack.py -b $(DEVICE_DFU_ADDRESS)@0:$< -D $(DEVICE_DFU_VID_PID) $@
+
+%.custom: %.bin Makefile
+ifdef CUSTOM_FORMAT_CMD
+	$(CUSTOM_FORMAT_CMD) $<
+else
+	:
+endif
 
 $(HEXFILE_DIR)/$(model)_%.elf: \
 		$(OUT_OBJS_S) $(OUT_OBJS) $(OUT_OBJS_CPP)    \
@@ -560,6 +607,8 @@ Core/Gen/Translation.%.cpp $(OUTPUT_DIR)/Core/Gen/translation.files/%.pickle: ..
 		--macros "$(CURDIR)/Core/Gen/macros.txt"      \
 		-o "$(CURDIR)/Core/Gen/Translation.$*.cpp"    \
 		--output-pickled "$(OUTPUT_DIR)/Core/Gen/translation.files/$*.pickle" \
+		--small-font "$(SMALL_FONT)" \
+		--large-font "$(LARGE_FONT)" \
 		$*
 
 Core/Gen/macros.txt: Makefile
@@ -591,6 +640,8 @@ Core/Gen/Translation_brieflz.%.cpp: $(OUTPUT_DIR)/Core/Gen/translation.files/%.o
 		-o "$(CURDIR)/Core/Gen/Translation_brieflz.$*.cpp" \
 		--input-pickled "$(OUTPUT_DIR)/Core/Gen/translation.files/$*.pickle" \
 		--strings-obj "$(OUTPUT_DIR)/Core/Gen/translation.files/$*.o"        \
+		--small-font "$(SMALL_FONT)" \
+		--large-font "$(LARGE_FONT)" \
 		$*
 
 Core/Gen/Translation_brieflz_font.%.cpp: $(OUTPUT_DIR)/Core/Gen/translation.files/%.pickle $(HOST_OUTPUT_DIR)/brieflz/libbrieflz.so Core/Gen/macros.txt
@@ -601,6 +652,8 @@ Core/Gen/Translation_brieflz_font.%.cpp: $(OUTPUT_DIR)/Core/Gen/translation.file
 		-o $(PWD)/Core/Gen/Translation_brieflz_font.$*.cpp \
 		--input-pickled $(OUTPUT_DIR)/Core/Gen/translation.files/$*.pickle \
 		--compress-font \
+		--small-font "$(SMALL_FONT)" \
+		--large-font "$(LARGE_FONT)" \
 		$*
 
 # The recipes to produce multi-language firmwares:
@@ -645,6 +698,8 @@ Core/Gen/Translation_multi.$(1).cpp: $(patsubst %,../Translations/translation_%.
 		--macros "$(CURDIR)/Core/Gen/macros.txt"           \
 		-o "$(CURDIR)/Core/Gen/Translation_multi.$(1).cpp" \
 		--output-pickled "$(OUTPUT_DIR)/Core/Gen/translation.files/multi.$(1).pickle" \
+		--small-font "$(SMALL_FONT)" \
+		--large-font "$(LARGE_FONT)" \
 		$(3)
 
 $(OUTPUT_DIR)/Core/Gen/translation.files/multi.$(1).pickle: Core/Gen/Translation_multi.$(1).cpp
@@ -658,6 +713,8 @@ Core/Gen/Translation_brieflz_multi.$(1).cpp: $(OUTPUT_DIR)/Core/Gen/translation.
 		--input-pickled "$(OUTPUT_DIR)/Core/Gen/translation.files/multi.$(1).pickle" \
 		--strings-obj "$(OUTPUT_DIR)/Core/Gen/translation.files/multi.$(1).o"        \
 		--compress-font \
+		--small-font "$(SMALL_FONT)" \
+		--large-font "$(LARGE_FONT)" \
 		$(3)
 
 endef # multi_lang_rule

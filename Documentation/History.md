@@ -1,4 +1,34 @@
 # Version Changes
+## v1.00
+- Initial FNIRSI HS-02 release.
+- [ARDC](https://nl.mathworks.com/help/slcontrol/ug/active-disturbance-rejection-control.html) temperature control to provide faster response than classical PID and zero steady state error (the original PID implementation has limited integration which fails to keep the temperature under heavy loads).
+- Full screen LCD support (limited to black/white).
+- Accelerometer support.
+- Status LED support.
+- Buzzer support; however, disabled in default releases because it is too annoying.
+
+---
+# PanKleszcz (fork)
+https://github.com/PanKleszcz/IronOS
+
+## v0.03
+
+ - Fnirsi HS-02A release
+ - Fix power limiting implementation
+
+## v0.02
+
+ - Fnirsi HS-02A release
+ - Optimize temperature control parameters
+ - Fix display SPI issues
+
+## v0.01
+
+ - Initial Fnirsi HS-02 release
+
+---
+# Ralim (original project)
+https://github.com/Ralim/IronOS
 
 ## v2.23
 

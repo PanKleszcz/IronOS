@@ -11,10 +11,10 @@ void ui_draw_power_source_icon(void) {
     } else {
       V = V / 10;
     }
-    int16_t xPos = OLED::getCursorX();
-    OLED::printNumber(V / 10, 1, FontStyle::LARGE);
-    OLED::setCursor(xPos, 16);
-    OLED::printNumber(V % 10, 1, FontStyle::LARGE);
+    int16_t xPos = Display::getCursorX();
+    Display::printNumber(V / 10, 1, FontStyle::LARGE);
+    Display::setCursor(xPos, 16);
+    Display::printNumber(V % 10, 1, FontStyle::LARGE);
     return;
   }
 #endif
@@ -33,9 +33,9 @@ void ui_draw_power_source_icon(void) {
     if (cellV > 9) {
       cellV = 9;
     }
-    OLED::drawBattery(cellV + 1);
+    Display::drawBattery(cellV + 1);
   } else {
-    OLED::drawSymbol(15); // Draw the DC Logo
+    Display::drawSymbol(15); // Draw the DC Logo
   }
 #endif
 }

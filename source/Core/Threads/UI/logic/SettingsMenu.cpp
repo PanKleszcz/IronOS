@@ -1,3 +1,4 @@
+#include "Display.hpp"
 #include "OperatingModes.h"
 #include "ScrollMessage.hpp"
 
@@ -21,11 +22,15 @@
 static void printShortDescription(SettingsItemIndex settingsItemIndex, uint16_t cursorCharPosition) {
   // print short description (default single line, explicit double line)
   uint8_t shortDescIndex = static_cast<uint8_t>(settingsItemIndex);
-  OLED::printWholeScreen(translatedString(Tr->SettingsShortNames[shortDescIndex]));
+  Display::printWholeScreen(translatedString(Tr->SettingsShortNames[shortDescIndex]));
 
   // prepare cursor for value
   // make room for scroll indicator
-  OLED::setCursor(cursorCharPosition * FONT_12_WIDTH - 2, 0);
+  #ifdef LCD_160x80
+  Display::setCursor(4, 40);
+  #else
+  Display::setCursor(cursorCharPosition * FONT_LARGE_WIDTH - 2, 0);
+  #endif
 }
 
 // Render a menu, based on the position given
@@ -154,12 +159,12 @@ OperatingMode gui_SettingsMenu(const ButtonState buttons, guiContext *cxt) {
     }
 
     // The height of the indicator is screen res height / total menu entries
-    uint8_t indicatorHeight = OLED_HEIGHT / *currentMenuLength;
+    uint8_t indicatorHeight = DISPLAY_HEIGHT / *currentMenuLength;
     if (indicatorHeight == 0) {
       indicatorHeight = 1; // always at least 1 pixel
     }
 
-    uint16_t position = (OLED_HEIGHT * (uint16_t)currentVirtualPosition) / *currentMenuLength;
+    uint16_t position = (DISPLAY_HEIGHT * (uint16_t)currentVirtualPosition) / *currentMenuLength;
 
     bool showScrollbar = true;
 
@@ -178,7 +183,7 @@ OperatingMode gui_SettingsMenu(const ButtonState buttons, guiContext *cxt) {
     showScrollbar |= (xTaskGetTickCount() % (TICKS_SECOND / 4) < (TICKS_SECOND / 8));
 
     if (showScrollbar) {
-      OLED::drawScrollIndicator((uint8_t)position, indicatorHeight);
+      Display::drawScrollIndicator((uint8_t)position, indicatorHeight);
     }
   }
 

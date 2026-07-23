@@ -6,7 +6,7 @@ TRANSLATION_DIR="../Translations"
 # AVAILABLE_LANGUAGES will be calculating according to json files in $TRANSLATION_DIR
 AVAILABLE_LANGUAGES=()
 BUILD_LANGUAGES=()
-AVAILABLE_MODELS=("TS100" "TS80" "TS80P" "Pinecil" "MHP30" "Pinecilv2" "S60" "S60P" "T55" "TS101")
+AVAILABLE_MODELS=("TS100" "TS80" "TS80P" "Pinecil" "MHP30" "Pinecilv2" "S60" "S60P" "T55" "TS101" "HS02")
 BUILD_MODELS=()
 OPTIONS=()
 
@@ -28,7 +28,7 @@ done
 usage() {
     builder_info
     echo -e "
-Usage : 
+Usage :
     $(basename "$0") [-l <LANG_CODES>] [-m <MODELS>] [-o <OPTIONS>] [-h]
 
 Parameters :
@@ -37,13 +37,13 @@ Parameters :
     -o key=val   : Pass options to make
     -h           : Show this help message
 
-Example : 
+Example :
     $(basename "$0") -l EN -m TS100                     (Build one language and model)
     $(basename "$0") -l EN -m \"TS100 MHP30\"             (Build one language and multi models)
     $(basename "$0") -l \"DE EN\" -m \"TS100 MHP30\"        (Build multi languages and models)
     $(basename "$0") -l EN -m Pinecilv2 -o ws2812b_enable=1
 
-INFO : 
+INFO :
     By default, without parameters, the build is for all platforms and all languages
 
 " 1>&2

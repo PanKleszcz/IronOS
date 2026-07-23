@@ -1,5 +1,5 @@
 #include "ScrollMessage.hpp"
-#include "OLED.hpp"
+#include "Display.hpp"
 #include "Settings.h"
 #include "configuration.h"
 
@@ -34,28 +34,28 @@ static uint16_t str_display_len(const char *const str) {
  *
  * @param message The null-terminated message string.
  */
-uint16_t messageWidth(const char *message) { return FONT_12_WIDTH * str_display_len(message); }
+uint16_t messageWidth(const char *message) { return FONT_LARGE_WIDTH * str_display_len(message); }
 
 void drawScrollingText(const char *message, TickType_t currentTickOffset) {
-  OLED::clearScreen();
+  Display::clearScreen();
   int16_t  messageOffset;
   uint16_t msgWidth = messageWidth(message);
-  if (msgWidth > OLED_WIDTH) {
+  if (msgWidth > DISPLAY_WIDTH) {
     messageOffset = (currentTickOffset / (getSettingValue(SettingsOptions::DescriptionScrollSpeed) == 1 ? TICKS_100MS / 10 : (TICKS_100MS / 5)));
-    messageOffset %= msgWidth + OLED_WIDTH; // Roll around at the end
-    if (messageOffset < OLED_WIDTH) {
+    messageOffset %= msgWidth + DISPLAY_WIDTH; // Roll around at the end
+    if (messageOffset < DISPLAY_WIDTH) {
       // Snap the message to the left edge.
-      messageOffset = OLED_WIDTH;
+      messageOffset = DISPLAY_WIDTH;
     } else if (messageOffset > msgWidth) {
       // Snap the message to the right edge.
       messageOffset = msgWidth;
     }
   } else {
     // Centre the message without scrolling.
-    messageOffset = (OLED_WIDTH - msgWidth) / 2 + msgWidth;
+    messageOffset = (DISPLAY_WIDTH - msgWidth) / 2 + msgWidth;
   }
 
   //^ Rolling offset based on time
-  OLED::setCursor((OLED_WIDTH - messageOffset), 0);
-  OLED::print(message, FontStyle::LARGE);
+  Display::setCursor((DISPLAY_WIDTH - messageOffset), 0);
+  Display::print(message, FontStyle::LARGE);
 }

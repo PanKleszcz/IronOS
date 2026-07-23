@@ -1,121 +1,64 @@
-[![CI Build](https://github.com/Ralim/IronOS/actions/workflows/push.yml/badge.svg)](https://github.com/Ralim/IronOS/actions/workflows/push.yml)
-[![Total Downloads](https://img.shields.io/github/downloads/ralim/IronOS/total)](https://github.com/Ralim/IronOS)
-[![Contributors](https://img.shields.io/github/contributors-anon/ralim/ironos?color=blue&style=flat)](https://github.com/Ralim/IronOS/graphs/contributors)
-[![Latest Release](https://img.shields.io/github/v/release/ralim/IronOS)](https://github.com/Ralim/IronOS/releases/latest)
+[![Total Downloads](https://img.shields.io/github/downloads/ok2cm/IronOS/total)](https://github.com/ok2cm/IronOS)
+[![Latest Release](https://img.shields.io/github/v/release/ok2cm/IronOS)](https://github.com/ok2cm/IronOS/releases/latest)
 
-# IronOS - Open Source Flexible Firmware for Soldering Hardware
+# IronOS - FNIRSI HS-02 fork
 
-_This repository was formerly known as TS100, it's the same great code. Just with more supported devices._
+This repository provides [FNIRSI HS-02](https://www.fnirsi.com/products/hs-02) iron support.
 
-Originally conceived as an alternative firmware for the _TS100_, this firmware has evolved into a complex soldering hardware control firmware.
+It is a fork of following projects:
+* [Ralim - IronOS](https://github.com/Ralim/IronOS)
+* [PanKleszcz - IronOS](https://github.com/PanKleszcz/IronOS)
 
-The firmware implements all of the standard features of a _smart_ soldering hardware, with lots of little extras and tweaks.
-I highly recommend reading the installation guide fully when installing on your device. And after install just explore the settings menu.
+## Key Features
 
-For soldering hardware that is designed to be powered by _smart_ power sources such as _PD_ or _QC_, the firmware supports settings around the negotiated power and voltage.
-For soldering hardware that is designed to be powered by batteries (_TS100_ & _Pinecil_), settings for a cutoff voltage for battery protection are supported.
+- [ARDC](https://nl.mathworks.com/help/slcontrol/ug/active-disturbance-rejection-control.html) temperature control to provide faster response than classical PID and zero steady state error (the original PID implementation has limited integration which fails to keep the temperature under heavy loads).
+- Full screen LCD support (limited to black/white).
+- Accelerometer support.
+- Status LED support.
+- Buzzer support; however, disabled in default releases because it is too annoying.
 
-Currently **31** languages are supported. When downloading the firmware for your soldering hardware, take note of the _language code_ in the file name.
+## Missing features & limitations
 
-This project is considered feature complete for use on a daily basis, _so please suggest any feature improvements you would like!_
-
-_This firmware does **NOT** support the USB port while running for changing settings (this is done through the onscreen menu only). Custom logos are edited on a computer and flashed in the same manner as firmware._
+- Tip resistance detection and short circuit protection.
+- PD required voltage selection.
+- Boot logo support.
+- Color LCD; however, there is not enough SRAM to easily implement color mode to support effects like scrolling.
+- Translations not tested (EN only).
 
 ## Supported Hardware
 
-|     Device     | DC  | QC  | PD  | EPR\*\*\*\* | BLE | Tip Sense | Recommended Purchase |                  Notes                  |
-| :------------: | :-: | :-: | :-: | :-: | :-: | :-------: | :------------------: | :-------------------------------------: |
-| Miniware MHP30 | ❌  | ❌  | ✔️  | ❌  | ❌  |    ✔️     |          ✔️          |                                         |
-|   Pinecil V1   | ✔️  | ✔️  | ✔️  | ❌  | ❌  |    ❌     |        ❌ \*         |                                         |
-|   Pinecil V2   | ✔️  | ✔️  | ✔️  | ✔️  | ✔️  |    ✔️     |          ✔️          |                                         |
-| Miniware TS101 | ✔️  | ❌  | ✔️  | ✔️  | ❌  |    ✔️     |     ✔️ \*\*\*\*\*    | Full OLED resolution not yet supported. |
-|   Sequre S60   | ❌  | ❌  | ✔️  | ❌  | ❌  |    ❌     |          ✔️          | Full OLED resolution not yet supported. |
-|  Sequre S60P   | ❌  | ❌  | ✔️  | ❌  | ❌  |    ❌     |          ✔️          | Full OLED resolution not yet supported. |
-|   Sequre T55   | ❌  | ❌  | ✔️  | ❌  | ❌  |    N/A    |          ✔️          | Full OLED resolution not yet supported. |
-| Miniware TS80P | ❌  | ✔️  | ✔️  | ❌  | ❌  |    N/A    |          ✔️          |                                         |
-| Miniware TS100 | ✔️  | ❌  | ❌  | ❌  | ❌  |    ❌     |        ❌\*\*        |                                         |
-| Miniware TS80  | ❌  | ✔️  | ❌  | ❌  | ❌  |    N/A    |       ❌\*\*\*       |                                         |
+|     Device     | DC  | QC  | PD   |        Notes                  |
+| :------------: | :-: | :-: | :--: | :---------------------------: |
+| FNIRSI HS-02A  | ✔️  | ❌  | ✔️\* |                               |
+| FNIRSI HS-02B  | ✔️  | ❌  | ✔️\* | Not tested                    |
+| \*\*           |     |     |      |                               |
 
-_Tip Sense_ refers to the device being able to choose between the _"regular"_ _TS100_ or _Hakko T12 style_ tips and _Pine64_'s custom shorter tips which have lower resistance and allow for more power. This is N/A for _TS80(P)_ as there is only one model of tip for them.
-
-_Recommended Purchase_ is only referring to if you are buying a **new** device. Of course all the devices listed are supported and will work excellently for years to come.
-
-The _TS101_ & _S60(P)_ irons and _MHP30_ & _T55_ plates feature a higher resolution OLED than other devices. Work is ongoing to support this fully, for now a cropped view is usable.
-
-\* _PinecilV1_ stopped being manufactured a long time ago now, all models for sale online are generally clones (or old stock). Vendors are trying to sell these for more than _Pine64_ sells the _V2_ for now. Thus the _V1_ is **_no longer recommended_**.
-
-\*\* Please note that _Miniware_ started shipping _TS100_'s using **cloned STM32 chips**. While these do work with _IronOS_, their **DFU bootloader** works terribly, and it is hard to get it to successfully flash larger firmware images like _IronOS_ without timing out. This is the main reason why the _TS100_ is **_no longer recommended_**.
-
-\*\*\* _TS80_ is replaced by _TS80P_. Production ramped down a long time ago and it's just existing stock clearing the system. It's marked not recommended being optimistic that people might pause and buy the far superior _TS80P_ instead. This is the main reason why the _TS80_ is **_no longer recommended_**.
-
-\*\*\*\* **EPR/PPS with 28V support** is _**disabled by default**_ due to [safety concerns](https://github.com/Ralim/IronOS/pull/2073), but to turn it back on set
-_PD Mode_ option in _Power settings_ submenu to _Safe_ or _Default_.
-
-\*\*\*\*\* Some users confirm that there is a version of newer _TS101_ revision with another OLED screen model, which is not supported yet at all by _IronOS_ unfortunately. See [this bug report](https://github.com/Ralim/IronOS/issues/2063) for more information.
-
-## Getting Started
-
-To get started with _IronOS firmware_, please jump to [Getting Started Guide](https://ralim.github.io/IronOS/GettingStarted/).
+\* _HS-02_ has CH224K PD controller which provides no negotiation feedback to the HS02A CPU (as far as I know). Requested voltage is fixed to 20V in this release. 
+\*\* [Original IronOS](https://github.com/Ralim/IronOS) HW ports are preserved but they are _not tested and may be broken!_
 
 ## Installation
 
-For notes on installation for your device, please refer to the flashing guide for your device:
-
-- [MHP30](https://ralim.github.io/IronOS/Flashing/MHP30)
-- [Pinecil V1](https://ralim.github.io/IronOS/Flashing/Pinecil%20V1/)
-- [Pinecil V2](https://ralim.github.io/IronOS/Flashing/Pinecil%20V2/)
-- [TS80 / TS80P](https://ralim.github.io/IronOS/Flashing/TS80%28P%29/)
-- [TS100](https://ralim.github.io/IronOS/Flashing/TS100)
+1. Hold _OK button_ and connect HS-02 to PC using USB cable.
+2. Release the button when _"Please drag the firmware file to the USB flash disk!"_ message is displayed.
+3. Wait until HS02 bootloader is detected as FAT mass storage device named _BOOTLOADER_ having an empty file _READY.TXT_ insde.
+4. Copy _HS02_xx_firmware.bin_ file on the _BOOTLOADER_ device.
+    1. On Linux, it is required to copy (replace) the file one more time for some reason.
+    2. There is a timeout (≈ 40 seconds) to start the upload. If expired, the bootloader is terminated and current firmware is launched.
+5. _"Updating firmware!"_ message is displayed and the device is rebooted into the new firmware.
 
 ## Builds
 
 The links in the table below allow to download available builds directly:
-- current _Stable Release_ is **`v2.22`**;
-- _Development Build_ **dynamically** provides _**the latest successful build**_ from **`dev`** branch.
 
-|        Device         | Stable Release | Development Build |
-|:---------------------:|:--------------:|:-----------------:|
-| Pinecil  V1           | [Pinecil.zip](https://github.com/Ralim/IronOS/releases/download/v2.23/Pinecil.zip)                           | [Pinecil.zip](https://nightly.link/Ralim/IronOS/workflows/push/dev/Pinecil.zip)                           |
-| Pinecil  V1/multilang | [Pinecil_multi-lang.zip](https://github.com/Ralim/IronOS/releases/download/v2.23/Pinecil_multi-lang.zip)     | [Pinecil_multi-lang.zip](https://nightly.link/Ralim/IronOS/workflows/push/dev/Pinecil_multi-lang.zip)     |
-| Pinecil  V2           | [PinecilV2.zip](https://github.com/Ralim/IronOS/releases/download/v2.23/PinecilV2.zip)                       | [PinecilV2.zip](https://nightly.link/Ralim/IronOS/workflows/push/dev/Pinecilv2.zip)                       |
-| Pinecil  V2/multilang | [PinecilV2_multi-lang.zip](https://github.com/Ralim/IronOS/releases/download/v2.23/PinecilV2_multi-lang.zip) | [PinecilV2_multi-lang.zip](https://nightly.link/Ralim/IronOS/workflows/push/dev/Pinecilv2_multi-lang.zip) |
-| Miniware TS100        | [TS100.zip](https://github.com/Ralim/IronOS/releases/download/v2.23/TS100.zip)                               | [TS100.zip](https://nightly.link/Ralim/IronOS/workflows/push/dev/TS100.zip)                               |
-| Miniware TS101        | [TS101.zip](https://github.com/Ralim/IronOS/releases/download/v2.23/TS101.zip)                               | [TS101.zip](https://nightly.link/Ralim/IronOS/workflows/push/dev/TS101.zip)                               |
-| Miniware TS80         | [TS80.zip](https://github.com/Ralim/IronOS/releases/download/v2.23/TS80.zip)                                 | [TS80.zip](https://nightly.link/Ralim/IronOS/workflows/push/dev/TS80.zip)                                 |
-| Miniware TS80P        | [TS80P.zip](https://github.com/Ralim/IronOS/releases/download/v2.23/TS80P.zip)                               | [TS80P.zip](https://nightly.link/Ralim/IronOS/workflows/push/dev/TS80P.zip)                               |
-| Miniware MHP30        | [MHP30.zip](https://github.com/Ralim/IronOS/releases/download/v2.23/MHP30.zip)                               | [MHP30.zip](https://nightly.link/Ralim/IronOS/workflows/push/dev/MHP30.zip)                               |
-| Sequre   S60          | [S60.zip](https://github.com/Ralim/IronOS/releases/download/v2.23/S60.zip)                                   | [S60.zip](https://nightly.link/Ralim/IronOS/workflows/push/dev/S60.zip)                                   |
-| Sequre   S60P         | Not Released                                                                                                 | [S60P.zip](https://nightly.link/Ralim/IronOS/workflows/push/dev/S60P.zip)                                 |
-| Sequre   T55          | Not Released                                                                                                 | [T55.zip](https://nightly.link/Ralim/IronOS/workflows/push/dev/T55.zip)                                   |
-
-## Key Features
-
-- PID style iron temperature control;
-- automatic sleep with selectable sensitivity;
-- adjustable & tweakable motion wake support;
-- all settings exposed in the intuitive menu;
-- (_TS100_) set a voltage lower limit for Lithium batteries so you don't kill your battery pack;
-- (_TS80_) set 18W or 24W settings for your power bank;
-- (_TS80P_) automatically negotiates appropriate PD and falls back to QC mode like _TS80_;
-- (_Pinecil_) supports all 3 power modes (PD, QC, DC In);
-- (_Pinecilv2_) supports _USB-PD EPR_ for **28V** operation;
-- improved readability Fonts, supporting multiple languages;
-- use hardware features to improve reliability;
-- boost mode lets you temporarily change the temperature when soldering (i.e. raise the temperature for short periods);
-- (_TS100_/_Pinecil_) battery charge level indicator if power source set to a LiPo cell count;
-- (_TS80_/_TS80P_/_Pinecil_) power bank operating voltage is displayed;
-- [custom boot up logo support](https://ralim.github.io/IronOS/Logo/)[^bootlogo];
-- automatic LCD rotation based on the orientation;
-- ... and many many other cool & hackable features![^changelog]
-
-[^bootlogo]:
-    **BOOTUP LOGO NOTICE**:
-    IronOS supports both a bootup logo _AND_ bootup animations.
-    However, _**they are no longer included in this repo**_.
-    **Please, [read the docs](https://ralim.github.io/IronOS/Logo/) for more information**.
+|        Device         | Stable Release |
+|:---------------------:|:--------------:|
+| FNIRSI HS-02          | [HS02.zip](https://github.com/ok2cm/IronOS/releases/download/v1.00/HS02.zip) |
 
 [^changelog]:
-    [See the full changelog here](https://ralim.github.io/IronOS/History).
+
+## Getting Started
+
+To get started with _IronOS firmware_, please jump to [Getting Started Guide](https://ralim.github.io/IronOS/GettingStarted/) (original IronOS documentation).
 
 ## Basic Control
 
@@ -143,51 +86,6 @@ After powering on the device for the first time with _IronOS_ installed and havi
   - `+/A` enters to menu & submenu settings or changes their values if they are activated already.
 
 Additional details are described in the [menu information](https://ralim.github.io/IronOS/Menu/).
-
-## Remote Control
-
-### Pinecil V2 only
-
-Pinecil V2 has [_Bluetooth Low Energy_ module](https://ralim.github.io/IronOS/Bluetooth), which is supported by _IronOS_ since `2.21` release to control some of the settings using additional tools like [PineSAM](https://github.com/builder555/PineSAM) or [PineTool](https://github.com/lachlanbell/PineTool). In `2.21` and `2.22` releases the module was _on_ by default. However, **_Bluetooth_ is turned off in the settings by default in current `dev` builds and for 2.23+** [due to security concerns](#1856).[^ble]
-
-To enable _Bluetooth_ back:
-- go to _Settings_ menu;
-- press `-/B` button four times to scroll the menu for `Advanced settings`;
-- press `+/A` button to open submenu;
-- press `+/A` button to toggle/enable _Bluetooth_ feature;
-- press `-/B` **and hold it** for just more than five seconds to exit from the _Settings_ menu.
-
-[^ble]:
-    This is related only to situations when a user restores default settings using menu, or when _IronOS_ update is taking place on a new device or on a device with a previous firmware version.
-
-## Translations
-
-Is your preferred language missing localisation of some of the text?
-Translations are stored as `json` files in the `Translations` folder.
-_Pull requests_ are loved and accepted to enhance the firmware.
-
-## Thanks
-
-If you love this firmware and want to continue my caffeine addiction, you can do so [here](https://paypal.me/RalimTek) (or email me for other options).
-I also want to give a shout out to all of the [Fantastic Contributors](https://github.com/Ralim/IronOS/graphs/contributors).
-
-Especially to the following users, who have helped in various ways that are massively appreciated:
-
-- [Dhiltonp](https://github.com/dhiltonp)
-- [Mrkvozrout](https://github.com/Mrkvozrout)
-- [JonnieZG](https://github.com/jonnieZG)
-- [Federck](https://github.com/federck)
-- [Jvitkauskas](https://github.com/jvitkauskas)
-- [Doegox](https://github.com/doegox)
-- [Perillamint](https://github.com/perillamint)
-- [GeminiServer](https://github.com/GeminiServer)
-- [Patrick Horlebein](https://github.com/PixelPirate)
-- [Firebie](https://github.com/Firebie)
-- [Agatti](https://github.com/agatti)
-- [Discip](https://github.com/discip)
-- [Paul Fertser](https://github.com/paulfertser)
-
-Plus the huge number of people who have contributed translations, your effort is massively appreciated.
 
 ## License
 

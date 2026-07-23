@@ -36,7 +36,7 @@ OperatingMode showPDDebug(const ButtonState buttons, guiContext *cxt) {
     }
   }
 
-  OLED::refresh();
+  Display::refresh();
 
   if (buttons == BUTTON_B_SHORT) {
     return OperatingMode::InitialisationDone;

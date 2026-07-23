@@ -1,7 +1,7 @@
 #ifndef UI_DRAWING_UI_DRAWING_HPP_
 #define UI_DRAWING_UI_DRAWING_HPP_
 #include "Buttons.hpp"
-#include "OLED.hpp"
+#include "Display.hpp"
 #include "OperatingModeUtilities.h"
 #include "Settings.h"
 #include "configuration.h"

@@ -1,0 +1,99 @@
+/*
+ * LCD.hpp
+ *
+ *  Created on: 27May.,2026
+ *      Author: Ben V. Brown <Ralim>
+ *      Modified: MrTick, OK2CM
+ *      Target ST7735, Fnirsi HS02
+ */
+
+#pragma once
+#include "configuration.h"
+#ifdef LCD_160x80
+#include "Font.h"
+#include "cmsis_os.h"
+#include <BSP.h>
+#include <stdbool.h>
+#include <string.h>
+
+#include <SPI_Wrapper.hpp>
+#define SPI_CLASS FRToSSPI
+
+#define LCD_WIDTH           160
+#define LCD_HEIGHT          80
+
+#define LCD_SCREEN_BUF_SIZE ((LCD_WIDTH * LCD_HEIGHT)/8)
+
+#define ST7735_XOFFSET 1
+#define ST7735_YOFFSET 26
+
+class LCD {
+public:
+
+  static void initialize(); // Startup the I2C coms (brings screen out of reset etc)
+  // Draw the buffer out to the LCD if any content has changed.
+  static void refresh(const bool force = false) {
+
+    if (force || checkDisplayBufferChecksum()) {
+      const int len = (LCD_WIDTH * (LCD_HEIGHT / 8));
+
+      // TODO: don't use strip buffers
+      for (uint8_t i = 0; i < LCD_HEIGHT/8; i++) {
+        setDrawingWindow(0, 8*i, LCD_WIDTH, 8);
+        SPI_CLASS::sendPixels(stripPointers[i], len/(LCD_HEIGHT/8));
+      }
+    }
+  }
+
+  static void setDisplayState(bool state) {
+    // TODO: implement
+    osDelay(TICKS_10MS);
+  }
+
+  // Set the rotation for the screen
+  static void setRotation(bool leftHanded);
+  static void setBrightness(uint8_t brightness);
+  static void setInverse(bool inverted);
+
+  // Clears the buffer
+  static void clearScreen() { memset(stripPointers[0], 0, LCD_WIDTH * (LCD_HEIGHT / 8)); }
+
+  static void drawArea(int16_t x, int8_t y, uint8_t wide, uint8_t height, const uint8_t *ptr);        // Draw an area, but y must be aligned on 0/8 offset
+  static void drawAreaSwapped(int16_t x, int8_t y, uint8_t wide, uint8_t height, const uint8_t *ptr); // Draw an area, but y must be aligned on 0/8 offset
+  static void fillArea(int16_t x, int8_t y, uint8_t wide, uint8_t height, const uint8_t value);       // Fill an area, but y must be aligned on 0/8 offset
+  static void drawFilledRect(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, bool clear);
+
+  static void flushSecondBuffer(void);
+  static void useSecondaryFramebuffer(bool useSecondary);
+
+  static bool scrollDown(uint8_t pos);
+  static bool scrollUp(uint8_t pos);
+  static bool scrollHorizontal(const bool dirForward, uint16_t progress, uint8_t offset);
+  static void setFramebuffer(uint8_t *buffer);
+
+private:
+  static bool checkDisplayBufferChecksum() {
+    static_assert(sizeof(screenBuffer) % 4 == 0, "screenBuffer size must be multiple of 4");
+    uint32_t hash = 0;
+    uint32_t len = sizeof(screenBuffer)/4;
+    uint32_t *pBuffer = (uint32_t*)screenBuffer;
+    while (len > 0) {
+      hash += (len * (*pBuffer++));
+      len--;
+    }
+
+    bool result     = hash != displayChecksum;
+    displayChecksum = hash;
+    return result;
+  }
+  static void         drawChar(uint16_t charCode, FontStyle fontStyle, const uint8_t soft_x_limit); // Draw a character to the current cursor location
+  static void         setDrawingWindow(uint8_t x, uint8_t y, uint8_t w, uint8_t h);
+
+  static uint8_t     *stripPointers[LCD_HEIGHT / 8]; // Pointers to the strips to allow for buffer having extra content
+  static uint32_t     displayChecksum;
+  static uint8_t      screenBuffer[LCD_SCREEN_BUF_SIZE]; // The data buffer
+  static uint8_t      secondFrameBuffer[LCD_SCREEN_BUF_SIZE];
+  static uint8_t      loopCounter;
+};
+
+#endif // LCD_160x80

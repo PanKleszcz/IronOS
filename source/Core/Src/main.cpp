@@ -9,8 +9,8 @@
 #include "Settings.h"
 #include "cmsis_os.h"
 #include "power.hpp"
-AccelType DetectedAccelerometerVersion = AccelType::Scanning;
-bool      settingsWereReset            = false;
+volatile AccelType DetectedAccelerometerVersion = AccelType::Scanning;
+bool               settingsWereReset            = false;
 // FreeRTOS variables
 
 osThreadId          GUITaskHandle;

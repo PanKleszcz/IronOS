@@ -15,6 +15,7 @@
 #include "Pins.h"
 #include "QC3.h"
 #include "SC7A20.hpp"
+#include "KXTJ3.hpp"
 #include "Settings.h"
 #include "TipThermoModel.h"
 #include "cmsis_os.h"
@@ -27,7 +28,7 @@
 
 #define MOVFilter 8
 uint8_t    accelInit        = 0;
-TickType_t lastMovementTime = 0;
+volatile TickType_t lastMovementTime = 0;
 // Order matters for probe order, some Acceleromters do NOT like bad reads; and we have a bunch of overlap of addresses
 void detectAccelerometerVersion() {
 #ifdef ACCEL_MMA
@@ -78,6 +79,15 @@ void detectAccelerometerVersion() {
     }
   }
 #endif
+#ifdef ACCEL_KXTJ3
+  if (KXTJ3::detect()) {
+    // Setup the KXTJ3 Accelerometer
+    if (KXTJ3::initalize()) {
+      DetectedAccelerometerVersion = AccelType::KXTJ3;
+      return;
+    }
+  }
+#endif
 #ifdef GPIO_VIBRATION
   if (true) {
     DetectedAccelerometerVersion = AccelType::GPIO;
@@ -119,6 +129,12 @@ inline void readAccelerometer(int16_t &tx, int16_t &ty, int16_t &tz, Orientation
       if (DetectedAccelerometerVersion == AccelType::SC7) {
     SC7A20::getAxisReadings(tx, ty, tz);
     rotation = SC7A20::getOrientation();
+  } else
+#endif
+#ifdef ACCEL_KXTJ3
+      if (DetectedAccelerometerVersion == AccelType::KXTJ3) {
+    KXTJ3::getAxisReadings(tx, ty, tz);
+    rotation = KXTJ3::getOrientation();
   } else
 #endif
 #ifdef GPIO_VIBRATION
@@ -172,7 +188,7 @@ void startMOVTask(void const *argument __unused) {
     readAccelerometer(tx, ty, tz, rotation);
     if (getSettingValue(SettingsOptions::OrientationMode) == 2) {
       if (rotation != ORIENTATION_FLAT) {
-        OLED::setRotation(rotation == ORIENTATION_LEFT_HAND); // link the data through
+        Display::setRotation(rotation == ORIENTATION_LEFT_HAND); // link the data through
       }
     }
     datax[currentPointer] = (int32_t)tx;

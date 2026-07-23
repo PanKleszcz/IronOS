@@ -3,34 +3,34 @@
 
 void ui_draw_soldering_detailed_sleep(TemperatureType_t tipTemp) {
 
-  OLED::clearScreen();
-  OLED::setCursor(0, 0);
-  OLED::print(translatedString(Tr->SleepingAdvancedString), FontStyle::SMALL);
-  OLED::setCursor(0, 8);
-  OLED::print(translatedString(Tr->SleepingTipAdvancedString), FontStyle::SMALL);
-  OLED::printNumber(tipTemp, 3, FontStyle::SMALL);
+  Display::clearScreen();
+  Display::setCursor(0, 0);
+  Display::print(translatedString(Tr->SleepingAdvancedString), FontStyle::SMALL);
+  Display::setCursor(0, 8);
+  Display::print(translatedString(Tr->SleepingTipAdvancedString), FontStyle::SMALL);
+  Display::printNumber(tipTemp, 3, FontStyle::SMALL);
   if (getSettingValue(SettingsOptions::TemperatureInF)) {
-    OLED::print(SmallSymbolDegF, FontStyle::SMALL);
+    Display::print(SmallSymbolDegF, FontStyle::SMALL);
   } else {
-    OLED::print(SmallSymbolDegC, FontStyle::SMALL);
+    Display::print(SmallSymbolDegC, FontStyle::SMALL);
   }
 
-  OLED::print(SmallSymbolSpace, FontStyle::SMALL);
+  Display::print(SmallSymbolSpace, FontStyle::SMALL);
   printVoltage();
-  OLED::print(SmallSymbolVolts, FontStyle::SMALL);
+  Display::print(SmallSymbolVolts, FontStyle::SMALL);
 
-  OLED::refresh();
+  Display::refresh();
 }
 
 void ui_draw_soldering_basic_sleep(TemperatureType_t tipTemp) {
 
-  OLED::clearScreen();
-  OLED::setCursor(0, 0);
+  Display::clearScreen();
+  Display::setCursor(0, 0);
 
-  OLED::print(LargeSymbolSleep, FontStyle::LARGE);
-  OLED::printNumber(tipTemp, 3, FontStyle::LARGE);
-  OLED::printSymbolDeg(FontStyle::EXTRAS);
+  Display::print(LargeSymbolSleep, FontStyle::LARGE);
+  Display::printNumber(tipTemp, 3, FontStyle::LARGE);
+  Display::printSymbolDeg(FontStyle::EXTRAS);
 
-  OLED::refresh();
+  Display::refresh();
 }
 #endif

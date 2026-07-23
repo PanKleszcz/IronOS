@@ -7,6 +7,7 @@ on:
       - master
       - dev
       - main
+      - fnirsi_hs02
 
 jobs:
   build:
@@ -27,6 +28,7 @@ jobs:
             "S60P",
             "T55",
             "TS101",
+            "HS02",
           ]
       fail-fast: true
 

@@ -21,7 +21,7 @@
 #include "uuid.h"
 
 #include "../../version.h"
-#include "OLED.hpp"
+#include "Display.hpp"
 #include "OperatingModes.h"
 #include "USBPD.h"
 #include "ble_characteristics.h"
@@ -33,7 +33,7 @@
 #include "pd.h"
 #endif
 
-extern TickType_t    lastMovementTime;
+extern volatile TickType_t    lastMovementTime;
 extern OperatingMode currentOperatingMode;
 
 int ble_char_read_status_callback(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, u16_t len, u16_t offset) {
@@ -265,14 +265,14 @@ int ble_char_write_setting_value_callback(struct bt_conn *conn, const struct bt_
     } else if (uuid_value < SettingsOptions::SettingsOptionsLength) {
       setSettingValue((SettingsOptions)(uuid_value), new_value);
       switch (uuid_value) {
-      case SettingsOptions::OLEDInversion:
-        OLED::setInverseDisplay(getSettingValue(SettingsOptions::OLEDInversion));
+      case SettingsOptions::DisplayInversion:
+        Display::setInverseDisplay(getSettingValue(SettingsOptions::DisplayInversion));
         break;
-      case SettingsOptions::OLEDBrightness:
-        OLED::setBrightness(getSettingValue(SettingsOptions::OLEDBrightness));
+      case SettingsOptions::DisplayBrightness:
+        Display::setBrightness(getSettingValue(SettingsOptions::DisplayBrightness));
         break;
       case SettingsOptions::OrientationMode:
-        OLED::setRotation(getSettingValue(SettingsOptions::OrientationMode) & 1);
+        Display::setRotation(getSettingValue(SettingsOptions::OrientationMode) & 1);
         break;
       default:
         break;

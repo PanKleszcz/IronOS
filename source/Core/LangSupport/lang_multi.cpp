@@ -1,4 +1,4 @@
-#include "OLED.hpp"
+#include "Display.hpp"
 #include "Translation.h"
 #include "Translation_multi.h"
 #include "brieflz.h"
@@ -70,6 +70,6 @@ void settings_setLanguageSwitch(void) {
 }
 
 bool settings_showLanguageSwitch(void) { return true; }
-void settings_displayLanguageSwitch(void) { OLED::printWholeScreen(translatedString(Tr->SettingsShortNames[static_cast<uint8_t>(SettingsItemIndex::LanguageSwitch)])); }
+void settings_displayLanguageSwitch(void) { Display::printWholeScreen(translatedString(Tr->SettingsShortNames[static_cast<uint8_t>(SettingsItemIndex::LanguageSwitch)])); }
 
 bool isLastLanguageOption(void) { return selectedLangIndex == (LanguageCount - 1); }

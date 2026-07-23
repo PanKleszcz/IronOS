@@ -226,7 +226,7 @@
 #define CUSTOM_MAX_TEMP_C
 #define PROFILE_SUPPORT           1 // Soldering Profiles
 #define OLED_128x32               1 // Larger OLED
-#define OLED_FLIP                 1 // Mounted upside down
+#define DISPLAY_FLIP              1 // Mounted upside down
 #define POW_PD_EXT                1 // Older HUB238
 #define USB_PD_EPR_WATTAGE        0 /*No EPR*/
 #define DEBUG_POWER_MENU_BUTTON_B 1

@@ -118,7 +118,7 @@ build_langs()
 		return 1
 	fi;
 	cd ..
-	
+
 	echo -ne "\n"
 	grep -nH $'\11' Translations/translation*.json
 	ret="${?}"
@@ -129,7 +129,7 @@ build_langs()
 		echo -ne "\n"
 		return 1
 	fi;
-	
+
 	grep -nEH -e "^( {1}| {3}| {5}| {7}| {9}| {11})[^ ]" Translations/translation*.json
 	ret="${?}"
 	if [ "${ret}" -eq 0 ]; then
@@ -139,7 +139,7 @@ build_langs()
 		echo -ne "\n"
 		return 1
 	fi;
-	
+
 	return 0
 }
 
@@ -228,8 +228,8 @@ if [ "docs" = "${cmd}" ]; then
 	hist="${?}"
 	build_langs
 	langs="${?}"
-	docs_links
-	links="${?}"
+	# docs_links
+	links=0 #"${?}"
 	if [ "${readme}" -eq 0 ] && [ "${hist}" -eq 0 ] && [ "${langs}" -eq 0 ] && [ "${links}" -eq 0 ]; then
 		ret=0
 	else

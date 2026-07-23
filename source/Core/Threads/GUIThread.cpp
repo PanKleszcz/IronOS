@@ -9,10 +9,10 @@ extern "C" {
 }
 #include "BootLogo.h"
 #include "Buttons.hpp"
+#include "Display.hpp"
 #include "I2CBB2.hpp"
 #include "LIS2DH12.hpp"
 #include "MMA8652FC.hpp"
-#include "OLED.hpp"
 #include "OperatingModeUtilities.h"
 #include "OperatingModes.h"
 #include "Settings.h"
@@ -42,21 +42,21 @@ guiContext    context;                                                  // Conte
 
 OperatingMode handle_post_init_state();
 OperatingMode guiHandleDraw(void) {
-  OLED::clearScreen(); // Clear ready for render pass
+  Display::clearScreen(); // Clear ready for render pass
   // Read button state
   ButtonState buttons = getButtonState();
   // Enforce screen on if buttons pressed, movement, hot tip etc
   if (buttons != BUTTON_NONE) {
-    OLED::setDisplayState(OLED::DisplayState::ON);
+    Display::setDisplayState(Display::DisplayState::ON);
   } else {
     // Buttons are none; check if we can sleep display
     uint32_t tipTemp = TipThermoModel::getTipInC();
     if ((tipTemp < 50) && getSettingValue(SettingsOptions::Sensitivity) &&
         (((xTaskGetTickCount() - lastMovementTime) > MOVEMENT_INACTIVITY_TIME) && ((xTaskGetTickCount() - lastButtonTime) > BUTTON_INACTIVITY_TIME))) {
-      OLED::setDisplayState(OLED::DisplayState::OFF);
+      Display::setDisplayState(Display::DisplayState::OFF);
       setStatusLED(LED_OFF);
     } else {
-      OLED::setDisplayState(OLED::DisplayState::ON);
+      Display::setDisplayState(Display::DisplayState::ON);
     }
     if (currentOperatingMode != OperatingMode::Soldering && currentOperatingMode != OperatingMode::SolderingProfile) {
       // Not in soldering mode, so set this based on temp
@@ -163,23 +163,23 @@ void guiRenderLoop(void) {
 
   // If the transition marker is set, we need to make the next draw occur to the secondary buffer so we have something to transition to
   if (context.transitionMode != TransitionAnimation::None) {
-    OLED::useSecondaryFramebuffer(true);
+    Display::useSecondaryFramebuffer(true);
     // Now we need to fill the secondary buffer with the _next_ frame to transistion to
     guiHandleDraw();
-    OLED::useSecondaryFramebuffer(false);
+    Display::useSecondaryFramebuffer(false);
     // Now dispatch the transition
     switch (context.transitionMode) {
     case TransitionAnimation::Down:
-      OLED::transitionScrollDown(context.viewEnterTime);
+      Display::transitionScrollDown(context.viewEnterTime);
       break;
     case TransitionAnimation::Left:
-      OLED::transitionSecondaryFramebuffer(false, context.viewEnterTime);
+      Display::transitionSecondaryFramebuffer(false, context.viewEnterTime);
       break;
     case TransitionAnimation::Right:
-      OLED::transitionSecondaryFramebuffer(true, context.viewEnterTime);
+      Display::transitionSecondaryFramebuffer(true, context.viewEnterTime);
       break;
     case TransitionAnimation::Up:
-      OLED::transitionScrollUp(context.viewEnterTime);
+      Display::transitionScrollUp(context.viewEnterTime);
 
     case TransitionAnimation::None:
     default:
@@ -189,7 +189,7 @@ void guiRenderLoop(void) {
     context.transitionMode = TransitionAnimation::None; // Clear transition flag
   }
   // Render done, draw it out
-  OLED::refresh();
+  Display::refresh();
 }
 
 OperatingMode handle_post_init_state() {
@@ -216,16 +216,16 @@ void startGUITask(void const *argument) {
   (void)argument;
   prepareTranslations();
 
-  OLED::initialize(); // start up the LCD
-  OLED::setBrightness(getSettingValue(SettingsOptions::OLEDBrightness));
-  OLED::setInverseDisplay(getSettingValue(SettingsOptions::OLEDInversion));
+  Display::initialize(); // start up the LCD
+  Display::setBrightness(getSettingValue(SettingsOptions::DisplayBrightness));
+  Display::setInverseDisplay(getSettingValue(SettingsOptions::DisplayInversion));
 
   bool buttonLockout = false;
   ui_pre_render_assets();
   getTipRawTemp(1); // reset filter
   memset(&context, 0, sizeof(context));
 
-  OLED::setRotation(getSettingValue(SettingsOptions::OrientationMode) & 1);
+  Display::setRotation(getSettingValue(SettingsOptions::OrientationMode) & 1);
 
   // Read boot button state
   if (getButtonA()) {

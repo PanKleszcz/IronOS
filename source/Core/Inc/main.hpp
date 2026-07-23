@@ -1,6 +1,6 @@
 #ifndef __MAIN_H
 #define __MAIN_H
-#include "OLED.hpp"
+#include "Display.hpp"
 #include "Setup.h"
 #include "Types.h"
 #include <stdint.h>
@@ -18,10 +18,10 @@ void                startGUITask(void const *argument);
 void                startPIDTask(void const *argument);
 void                startMOVTask(void const *argument);
 void                startPOWTask(void const *argument);
-extern TaskHandle_t pidTaskNotification;
+extern volatile TaskHandle_t pidTaskNotification;
 extern int32_t      powerSupplyWattageLimit;
 extern uint8_t      accelInit;
-extern TickType_t   lastMovementTime;
+extern volatile TickType_t   lastMovementTime;
 #ifdef __cplusplus
 }
 // Accelerometer type
@@ -35,8 +35,9 @@ enum class AccelType {
   SC7       = 6,
   GPIO      = 7,
   LIS_CLONE = 8,
+  KXTJ3     = 9,
 };
-extern AccelType DetectedAccelerometerVersion;
+extern volatile AccelType DetectedAccelerometerVersion;
 
 #endif
 #endif /* __MAIN_H */
