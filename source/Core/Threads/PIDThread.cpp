@@ -112,6 +112,11 @@ void startPIDTask(void const *argument __unused) {
 }
 
 #if defined (TIP_CONTROL_PID)
+// Integral clamp as a multiple of max_output; boards can override to give the
+// integral term more authority against sustained heavy loads.
+#ifndef TIP_PID_INTEGRAL_LIMIT_SCALE
+#define TIP_PID_INTEGRAL_LIMIT_SCALE 5
+#endif
 template <class T, T Kp, T Ki, T Kd, T integral_limit_scale> struct PID {
   T previous_error_term;
   T integration_running_sum;
@@ -122,19 +127,6 @@ template <class T, T Kp, T Ki, T Kd, T integral_limit_scale> struct PID {
     // Proportional term
     const T kp_result = Kp * target_delta;
 
-    // Integral term as we use mixed sampling rates, we cant assume a constant sample interval
-    // Thus we multiply this out by the interval time to ~= dv/dt
-    // Then the shift by 1000 is ms -> Seconds
-
-    integration_running_sum += (target_delta * (T)interval_ms * Ki) / 1000;
-
-    // We constrain integration_running_sum to limit windup
-    // This is not overly required for most use cases but can prevent large overshoot in constrained implementations
-    if (integration_running_sum > integral_limit_scale * max_output) {
-      integration_running_sum = integral_limit_scale * max_output;
-    } else if (integration_running_sum < -integral_limit_scale * max_output) {
-      integration_running_sum = -integral_limit_scale * max_output;
-    }
     // Calculate the integral term, we use a shift 100 to get precision in integral as we often need small amounts
     T ki_result = integration_running_sum / 100;
 
@@ -144,6 +136,27 @@ template <class T, T Kp, T Ki, T Kd, T integral_limit_scale> struct PID {
 
     // Summation of the outputs
     T output = kp_result + ki_result + kd_result;
+
+    // Integral term as we use mixed sampling rates, we cant assume a constant sample interval
+    // Thus we multiply this out by the interval time to ~= dv/dt
+    // Then the shift by 1000 is ms -> Seconds
+    // Conditional integration for anti-windup: skip accumulating while the output is
+    // already saturated in the direction the error is pushing. Otherwise the sum rails
+    // to +/- the clamp during heatup/overshoot and takes minutes to bleed back off,
+    // which shows up as a slow limit cycle (oscillation) around the set point.
+    const bool saturated_high = (output >= max_output) && (target_delta > 0);
+    const bool saturated_low  = (output <= 0) && (target_delta < 0);
+    if (!saturated_high && !saturated_low) {
+      integration_running_sum += (target_delta * (T)interval_ms * Ki) / 1000;
+    }
+
+    // We constrain integration_running_sum to limit windup
+    // This is not overly required for most use cases but can prevent large overshoot in constrained implementations
+    if (integration_running_sum > integral_limit_scale * max_output) {
+      integration_running_sum = integral_limit_scale * max_output;
+    } else if (integration_running_sum < -integral_limit_scale * max_output) {
+      integration_running_sum = -integral_limit_scale * max_output;
+    }
 
     // Restrict to max / 0
     if (output > max_output) {
@@ -237,7 +250,7 @@ int32_t getPIDResultX10Watts(TemperatureType_t set_point, TemperatureType_t curr
   static TickType_t lastCall = 0;
 
 #if defined(TIP_CONTROL_PID)
-  static PID<TemperatureType_t, TIP_PID_KP, TIP_PID_KI, TIP_PID_KD, 5> ctrl = {0, 0};
+  static PID<TemperatureType_t, TIP_PID_KP, TIP_PID_KI, TIP_PID_KD, TIP_PID_INTEGRAL_LIMIT_SCALE> ctrl = {0, 0};
   const TickType_t interval = (xTaskGetTickCount() - lastCall);
 
 #elif defined(TIP_CONTROL_ARDC1)
