@@ -89,7 +89,7 @@ static void switchToFastPWM(void) {
   htim2.Instance->PSC  = 1500;
 }
 
-void setTipPWM(const uint8_t pulse, const bool shouldUseFastModePWM) {
+void setTipPWM(const uint16_t pulse, const bool shouldUseFastModePWM) {
   PWMSafetyTimer = 20; // This is decremented in the handler for PWM so that the tip pwm is
                        // disabled if the PID task is not scheduled often enough.
   pendingPWM = pulse;

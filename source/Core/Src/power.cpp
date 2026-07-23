@@ -9,13 +9,13 @@
 #include <Settings.h>
 #include <power.hpp>
 
-static int32_t PWMToX10Watts(uint8_t pwm, uint8_t sample);
+static int32_t PWMToX10Watts(uint16_t pwm, uint8_t sample);
 const int      fastPWMChangeoverPoint     = 128;
 const int      fastPWMChangeoverTolerance = 16;
 
 expMovingAverage<uint32_t, wattHistoryFilter> x10WattHistory = {0};
 
-bool shouldBeUsingFastPWMMode(const uint8_t pwmTicks) {
+bool shouldBeUsingFastPWMMode(const uint16_t pwmTicks) {
   // Determine if we should use slow or fast PWM mode
   // Crossover between modes set around the midpoint of the PWM control point
   static bool lastPWMWasFast = true;
@@ -56,7 +56,7 @@ uint32_t availableW10(uint8_t sample) {
   // availableMilliWattsX10 is now an accurate representation
   return availableWattsX10;
 }
-uint8_t X10WattsToPWM(int32_t x10Watts, uint8_t sample) {
+uint16_t X10WattsToPWM(int32_t x10Watts, uint8_t sample) {
   // Scale input x10Watts to the pwm range available
   if (x10Watts <= 0) {
     // keep the battery voltage updating the filter
@@ -74,7 +74,7 @@ uint8_t X10WattsToPWM(int32_t x10Watts, uint8_t sample) {
   return pwm;
 }
 
-static int32_t PWMToX10Watts(uint8_t pwm, uint8_t sample) {
+static int32_t PWMToX10Watts(uint16_t pwm, uint8_t sample) {
   uint32_t maxMW = availableW10(sample); // Get the milliwatts for the max pwm period
   // Then convert pwm into percentage of powerPWM to get the percentage of the max mw
   return (((uint32_t)pwm) * maxMW) / powerPWM;
