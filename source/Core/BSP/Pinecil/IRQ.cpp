@@ -84,7 +84,7 @@ void switchToSlowPWM(void) {
   TIMER_CH0CV(TIMER1) = powerPWM + holdoffTicks / 2;
   TIMER_PSC(TIMER1)   = 36000;
 }
-void setTipPWM(const uint8_t pulse, const bool shouldUseFastModePWM) {
+void setTipPWM(const uint16_t pulse, const bool shouldUseFastModePWM) {
   PWMSafetyTimer = 10; // This is decremented in the handler for PWM so that the tip pwm is
                        // disabled if the PID task is not scheduled often enough.
   pendingPWM = pulse;
