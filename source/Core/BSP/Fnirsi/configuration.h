@@ -173,7 +173,7 @@
 /// Active Disturbance Rejection Control - first order
 // https://nl.mathworks.com/help/slcontrol/ug/active-disturbance-rejection-control.html
 // LIMITATION: estimator coefficients (A, B) are precalculated for FIXED sample rate
-#define TIP_CONTROL_ARDC1
+//#define TIP_CONTROL_ARDC1
 #define TIP_ARDC1_Kp            1.5
 #define TIP_ARDC1_Kd            0.5
 #define TIP_ARDC1_b0            0.085
@@ -181,10 +181,11 @@
 #define TIP_ARDC1_B             {TIP_ARDC1_b0*1.2609e-03/0.07, 9.3200e-01, TIP_ARDC1_b0*-2.1961e-03/0.07, 9.0063e-01}
 
 /// Use PID Control
-//#define TIP_CONTROL_PID
-#define TIP_PID_KP              20   // Good compromise between overshoot and reaction speed
-#define TIP_PID_KI              6    //
+#define TIP_CONTROL_PID
+#define TIP_PID_KP              40   // Matches proven Pinecilv2 value; higher drive under load
+#define TIP_PID_KI              300  // Integral climb rate is proportional to error; 300 closes a small (2-3C) load-induced droop in ~10-20s. Watch for slow hunting around the set point if raised further
 #define TIP_PID_KD              8000 // C245 has a surprisingly high inertia, needs lot of dampening
+#define TIP_PID_INTEGRAL_LIMIT_SCALE 30 // Default 5 caps integral at ~4.9W; 30 (~29W) covers measured heavy-load losses (XT60 at 430C draws 15-18W)
 
 /// Default Control if no other controller is defined
 #define TIP_THERMAL_MASS        0    // Not used for PID
