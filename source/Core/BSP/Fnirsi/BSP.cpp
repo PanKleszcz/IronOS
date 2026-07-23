@@ -12,6 +12,11 @@
 #include "history.hpp"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "Buttons.hpp"
+#include "FnirsiBootLogo.h"
+// n32l40x.h defines LCD as a peripheral pointer macro; free the name for the LCD class.
+#undef LCD
+#include "LCD.hpp"
 // #include "USBPD.h"
 // #include "configuration.h"
 // #include "history.hpp"
@@ -307,7 +312,10 @@ uint16_t getTipInertia() {
 }
 
 void showBootLogo(void) {
-  // TODO: IMPLEMENT
+  // Blit the colour FNIRSI logo (extracted from stock firmware) straight to the panel,
+  // then hold it until a button is pressed or the user's logo timeout elapses.
+  LCD::drawNativeImage(FNIRSI_LOGO_X, FNIRSI_LOGO_Y, FNIRSI_LOGO_W, FNIRSI_LOGO_H, fnirsiBootLogo);
+  waitForButtonPressOrTimeout(TICKS_SECOND * 2);
 }
 
 bool getFUS302IRQLow() { return false; }

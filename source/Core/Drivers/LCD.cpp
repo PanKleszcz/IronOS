@@ -91,6 +91,11 @@ FRToSSPI::SPI_CMD lcdSetAreaCmds[] = {
     {ST7735_RAMWR, FRToSSPI::SPI_CMD_PAYLOAD, 0,                                                               NULL},
 };
 
+void LCD::drawNativeImage(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t *rgb565) {
+  setDrawingWindow(x, y, w, h);
+  SPI_CLASS::fastSend(rgb565, (size_t)w * h * 2);
+}
+
 void LCD::setDrawingWindow(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
   lcdSetAreaCmds[0].data[1] = x + ST7735_XOFFSET;
   lcdSetAreaCmds[0].data[3] = x + w + ST7735_XOFFSET - 1;
