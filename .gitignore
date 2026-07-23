@@ -216,3 +216,7 @@ Logo GUI/TS100 Logo Editor/TS100 Logo Editor/bin/
 # Tests/linters/sanitizers
 source/check-style.log
 .ash_history
+
+# Third-party stock firmware images and RE artifacts derived from them: proprietary,
+# not ours to redistribute in a GPL repo. Keep this local-only.
+Development Resources/
