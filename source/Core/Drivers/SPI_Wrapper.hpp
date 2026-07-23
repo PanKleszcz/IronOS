@@ -47,6 +47,7 @@ public:
 
 
   static void sendData(uint8_t* data, size_t length);
+  static void fastSend(const uint8_t* data, size_t length); // like sendData, TX-pipelined for large blits
   static void sendByte(uint8_t byte);
   static void sendByteMutiple(uint8_t byte, size_t times);
   static void sendCmd(uint8_t cmd);

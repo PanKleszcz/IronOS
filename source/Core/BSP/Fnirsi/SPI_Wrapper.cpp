@@ -62,6 +62,24 @@ void FRToSSPI::sendData(uint8_t *data, size_t length) {
   LCD_CS_HIGH();
 }
 
+// Fast raw-byte blit for large transfers (e.g. the full-screen boot logo). Keeps the SPI
+// TX pipeline full by waiting on TX-empty instead of BUSY, and writes the data register
+// directly. Same technique as sendPixels; ~2.5x faster than the sendData/_spiSendByte
+// path. Kept separate so the conservative sendData path (LCD init commands) is untouched.
+void FRToSSPI::fastSend(const uint8_t *data, size_t length) {
+  LCD_CS_LOW();
+  for (size_t i = 0; i < length; i++) {
+    while (!(SPI1->STS & SPI_I2S_TE_FLAG))
+      ;
+    SPI1->DAT = data[i];
+  }
+  while (!(SPI1->STS & SPI_I2S_TE_FLAG))
+    ;
+  while (SPI1->STS & SPI_I2S_BUSY_FLAG)
+    ;
+  LCD_CS_HIGH();
+}
+
 void FRToSSPI::sendPixels(uint8_t *data, size_t length) {
   LCD_CS_LOW();
   for (size_t i = 0; i < length; i++) {
