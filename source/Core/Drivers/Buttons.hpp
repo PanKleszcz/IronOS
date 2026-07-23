@@ -18,6 +18,8 @@ enum ButtonState {
   BUTTON_B_LONG    = 8,  /* User is  holding the back button*/
   BUTTON_BOTH      = 16, /* User has pressed both buttons*/
   BUTTON_BOTH_LONG = 32, /* User is holding both buttons*/
+  BUTTON_OK_SHORT  = 64, /* User has pressed a dedicated OK button (3-button devices only)*/
+  BUTTON_OK_LONG   = 128,/* User is holding a dedicated OK button (3-button devices only)*/
 
   /*
    * Note:

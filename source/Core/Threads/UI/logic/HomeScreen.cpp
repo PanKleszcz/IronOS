@@ -35,6 +35,7 @@ OperatingMode handleHomeButtons(const ButtonState buttons, guiContext *cxt) {
     return OperatingMode::TemperatureAdjust;
 #endif
     break;
+  case BUTTON_OK_SHORT: // Dedicated OK button enters soldering (same as front-press)
   case BUTTON_F_SHORT:
     if (!isTipDisconnected()) {
       bool detailedView   = getSettingValue(SettingsOptions::DetailedIDLE) && getSettingValue(SettingsOptions::DetailedSoldering);

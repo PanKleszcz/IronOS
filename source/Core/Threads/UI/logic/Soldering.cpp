@@ -56,6 +56,8 @@ OperatingMode handleSolderingButtons(const ButtonState buttons, guiContext *cxt)
     cxt->scratch_state.state2 = 0;
     cxt->scratch_state.state1 = 0;
     break;
+  case BUTTON_OK_LONG: // Dedicated OK long-press returns to the home screen
+  /*Fall through*/
   case BUTTON_BOTH:
   /*Fall through*/
   case BUTTON_B_LONG:
@@ -67,6 +69,7 @@ OperatingMode handleSolderingButtons(const ButtonState buttons, guiContext *cxt)
       cxt->scratch_state.state2 = 1;
     }
     break;
+  case BUTTON_OK_SHORT: // Dedicated OK button opens temperature adjust
   case BUTTON_F_SHORT:
   case BUTTON_B_SHORT:
     cxt->transitionMode = TransitionAnimation::Left;
