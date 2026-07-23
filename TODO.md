@@ -41,14 +41,46 @@ Update the CLAUDE.md hardware section once measured. (Doesn't affect
 measurement accuracy — the gain constant cancels out in both temperature-model
 code paths; this is purely archaeological.)
 
-## 4. Upstream PR
+## 4. Persistent load-bias memory for the PID integral (design idea, not yet built)
+
+Problem: the integral term has no memory across load transitions. Re-touching a
+joint after the tip idled resets the effective starting point near zero, so
+every heavy-load event pays the same ~10s (at KI=700) climb before the
+integral catches up, even for back-to-back identical joints (e.g. soldering
+several XT60 connectors in a row).
+
+Proposed approach: **persistent bias with a slow forgetting factor** (a form of
+integral preload / bumpless warm-start). Add a second state variable — a
+low-pass filter of the fast integral's converged value, with a time constant
+of minutes rather than seconds, so it doesn't chase moment-to-moment error but
+does track "what steady-state power did recent heavy loads actually need."
+When a load-onset event is detected (e.g. a fast temperature drop beyond some
+threshold), preload the fast integral's running sum from this slow memory
+instead of starting from wherever it happened to be — subsequent joints start
+already near the right power level instead of climbing from scratch. The
+"forget when it doesn't fit" behavior falls out for free: it's just a
+continuously-updating low-pass filter, so if the real load differs from the
+remembered one, the fast integral corrects it and drags the slow memory along.
+
+Trade-off to accept: if you solder a big joint and then immediately touch a
+small one, it'll transiently overshoot (primed with the big joint's memory)
+until the fast integral corrects it back down — trading rare "wrong load
+guessed" overshoot for faster convergence on the common "same load repeated"
+case.
+
+Scope: new state variable + a load-onset detector heuristic + tuning the slow
+time constant. More invasive than a gain tweak — build and test as its own
+change, likely bundled with the feedforward compensation work in section 2
+once the thermometer is in hand.
+
+## 5. Upstream PR
 
 - The `fix(pid): conditional anti-windup + configurable integral clamp` commit
   (e1f34028) is worth submitting to Ralim/IronOS on its own — every board using
   the shared PID controller (Pinecilv2, etc.) benefits from eliminating the
   slow limit-cycle around the set point after heatup/overshoot.
 
-## 5. Misc
+## 6. Misc
 
 - [ ] Push `fix/hs02-pid-tuning` to the fork.
 - [ ] (Optional) Runtime ADRC/PID switch menu — the original idea, superseded
