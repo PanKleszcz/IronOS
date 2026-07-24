@@ -60,6 +60,9 @@ public:
   // physical screenBuffer, interpreted differently -- switch modes when crossing between them.
   static void setColorMode(bool active) { colorModeActive = active; }
   static bool isColorMode() { return colorModeActive; }
+  // A colour page owns its four RGB565 entries. Index 0 must remain that page's
+  // background because clearScreenColor() represents it with an all-zero buffer.
+  static void setColorPalette(const uint16_t *palette) { activePalette2bpp = palette ? palette : palette2bpp; }
 
   // Clears the buffer to palette index 0 (background). Index 0 is chosen so this is a plain
   // memset, same trick as the existing mono clearScreen().
@@ -77,6 +80,9 @@ public:
   static void drawGlyph2bpp(uint16_t charCode, FontStyle fontStyle, uint8_t x, uint8_t y, uint8_t colorIndex);
   // Blits a whole already-encoded string (same byte convention as Display::print) left-to-right.
   static void drawTextColor(const char *str, uint8_t x, uint8_t y, FontStyle fontStyle, uint8_t colorIndex, uint8_t maxChars = 255);
+  // Blits a transparent 1bpp bitmap encoded as column-major vertical strips.
+  // Page-specific colour UIs own their glyph data; this is only the generic blitter.
+  static void drawBitmap2bpp(const uint8_t *bitmap, uint8_t width, uint8_t height, uint8_t x, uint8_t y, uint8_t colorIndex);
 
   static void setDisplayState(bool state) {
     // TODO: implement
@@ -149,7 +155,8 @@ private:
 
   // 4-colour palette for the 2bpp colour screens, in device RGB565 (big-endian on the wire).
   // Index 0 must be the background colour (clearScreenColor() relies on an all-zero buffer).
-  static const uint16_t palette2bpp[4];
+  static const uint16_t  palette2bpp[4];
+  static const uint16_t *activePalette2bpp;
 };
 
 #endif // LCD_160x80

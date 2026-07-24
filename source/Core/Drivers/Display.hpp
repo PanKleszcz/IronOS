@@ -126,6 +126,7 @@ public:
   // 2bpp colour screen support (HS-02 home/soldering gauge). Only exists on the colour panel --
   // DISPLAY_CLASS is OLED on mono boards, which has no 2bpp path at all.
   static void setColorMode(bool active) { DISPLAY_CLASS::setColorMode(active); }
+  static void setColorPalette(const uint16_t *palette) { DISPLAY_CLASS::setColorPalette(palette); }
   static void clearScreenColor() { DISPLAY_CLASS::clearScreenColor(); }
   static void fillRectColor(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t colorIndex) { DISPLAY_CLASS::fillRect2bpp(x, y, w, h, colorIndex); }
   static void drawRingColor(uint8_t cx, uint8_t cy, uint8_t r, uint8_t thickness, uint8_t colorIndex, float startAngle, float endAngle) {
@@ -138,6 +139,9 @@ public:
     DISPLAY_CLASS::drawTextColor(str, x, y, fontStyle, colorIndex, maxChars);
   }
   static void printNumberColor(uint16_t number, uint8_t places, uint8_t x, uint8_t y, FontStyle fontStyle, uint8_t colorIndex);
+  static void drawBitmapColor(const uint8_t *bitmap, uint8_t width, uint8_t height, uint8_t x, uint8_t y, uint8_t colorIndex) {
+    DISPLAY_CLASS::drawBitmap2bpp(bitmap, width, height, x, y, colorIndex);
+  }
 #endif
 
 private:

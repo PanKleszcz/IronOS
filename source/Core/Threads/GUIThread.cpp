@@ -185,6 +185,15 @@ void guiRenderLoop(void) {
         newMode = OperatingMode::HomeScreen;
       }
     }
+#if defined(LCD_160x80)
+    // Menus use the legacy 1bpp buffer while home/soldering/sleep use the
+    // 2bpp colour interpretation. The transition routines only understand
+    // two 1bpp framebuffers, so never animate across that representation
+    // boundary (for example SettingsMenu -> HomeScreen).
+    if (isColorScreenMode(currentOperatingMode) != isColorScreenMode(newMode)) {
+      context.transitionMode = TransitionAnimation::None;
+    }
+#endif
     memset(&context.scratch_state, 0, sizeof(context.scratch_state));
     currentOperatingMode = newMode;
   }

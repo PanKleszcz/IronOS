@@ -36,6 +36,7 @@ const uint16_t LCD::palette2bpp[4] = {
     0xFBC5, // ember (heating)
     0x45B8, // cool (idle/sleep)
 };
+const uint16_t *LCD::activePalette2bpp = LCD::palette2bpp;
 
 // ST7735 Commands
 #define ST7735_NOP     0x00
@@ -431,7 +432,7 @@ void LCD::refreshColor() {
     for (uint16_t y = 0; y < LCD_HEIGHT; y++) {
       uint8_t  packed = screenBuffer[y * (LCD_WIDTH / 4) + (x / 4)];
       uint8_t  index  = (packed >> ((x % 4) * 2)) & 0x3;
-      uint16_t rgb    = (uint16_t)~palette2bpp[index]; // INVON: send the inverse of the true colour
+      uint16_t rgb    = (uint16_t)~activePalette2bpp[index]; // INVON: send the inverse of the true colour
       colRGB[y * 2]     = (uint8_t)(rgb >> 8);
       colRGB[y * 2 + 1] = (uint8_t)(rgb & 0xFF);
     }
@@ -461,12 +462,31 @@ void LCD::plotRadialSegment(uint8_t cx, uint8_t cy, float angle, uint8_t rInner,
 void LCD::drawRing2bpp(uint8_t cx, uint8_t cy, uint8_t r, uint8_t thickness, uint8_t colorIndex, float startAngle, float endAngle) {
   const uint8_t rInner = (thickness / 2 >= r) ? 0 : r - thickness / 2;
   const uint8_t rOuter = r + thickness / 2;
-  // Step finely enough that the outer-radius arc has no gaps (~1px per step).
-  const float   arcLen = fabsf(endAngle - startAngle) * rOuter;
-  const uint16_t steps  = (uint16_t)arcLen + 2;
-  for (uint16_t i = 0; i <= steps; i++) {
-    const float angle = startAngle + (endAngle - startAngle) * ((float)i / steps);
-    plotRadialSegment(cx, cy, angle, rInner, rOuter, colorIndex);
+  const uint16_t innerSquared = rInner * rInner;
+  const uint16_t outerSquared = rOuter * rOuter;
+  constexpr float kTwoPi = 6.28318531f;
+
+  // Rasterise the annular sector directly. Sampling radial spokes leaves holes
+  // after float-to-integer truncation; testing every pixel guarantees a solid
+  // ring on the actual 160x80 framebuffer.
+  for (int16_t y = (int16_t)cy - rOuter; y <= (int16_t)cy + rOuter; y++) {
+    for (int16_t x = (int16_t)cx - rOuter; x <= (int16_t)cx + rOuter; x++) {
+      const int16_t dx = x - cx, dy = y - cy;
+      const uint16_t distanceSquared = dx * dx + dy * dy;
+      if (distanceSquared < innerSquared || distanceSquared > outerSquared) {
+        continue;
+      }
+      float angle = atan2f((float)dy, (float)dx);
+      if (angle < 0.0f) {
+        angle += kTwoPi;
+      }
+      if (angle < startAngle) {
+        angle += kTwoPi;
+      }
+      if (angle >= startAngle && angle <= endAngle && x >= 0 && y >= 0 && x < LCD_WIDTH && y < LCD_HEIGHT) {
+        setPixel2bpp((uint8_t)x, (uint8_t)y, colorIndex);
+      }
+    }
   }
 }
 
@@ -528,6 +548,21 @@ void LCD::drawTextColor(const char *str, uint8_t x, uint8_t y, FontStyle fontSty
     }
     drawGlyph2bpp(index, fontStyle, x, y, colorIndex);
     x += fontWidth;
+  }
+}
+
+void LCD::drawBitmap2bpp(const uint8_t *bitmap, uint8_t width, uint8_t height, uint8_t x, uint8_t y, uint8_t colorIndex) {
+  const uint8_t strips = (height + 7) / 8;
+  for (uint8_t strip = 0; strip < strips; strip++) {
+    for (uint8_t gx = 0; gx < width; gx++) {
+      const uint8_t bits = bitmap[strip * width + gx];
+      for (uint8_t gy = 0; gy < 8; gy++) {
+        const uint8_t py = strip * 8 + gy;
+        if (py < height && (bits & (1u << gy))) {
+          setPixel2bpp(x + gx, y + py, colorIndex);
+        }
+      }
+    }
   }
 }
 
