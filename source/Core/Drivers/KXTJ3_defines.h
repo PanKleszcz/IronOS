@@ -20,6 +20,7 @@
 #define KXTJ3_REG_ZOUT_L          0x0A
 #define KXTJ3_REG_ZOUT_H          0x0B
 #define KXTJ3_REG_WHO_AM_I        0x0F
+#define KXTJ3_REG_DATA_CTRL_REG    0x21
 #define KXTJ3_REG_CTRL_REG1       0x1B
 
 #endif /* DRIVERS_KXTJ3_DEFINES_H_ */

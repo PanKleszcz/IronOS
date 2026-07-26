@@ -18,6 +18,7 @@ bool KXTJ3::detect() {
 
 static const ACCEL_I2C_CLASS::I2C_REG i2c_registers[] = {
     {KXTJ3_REG_CTRL_REG1, 0x00, 0}, // disable mode
+    {KXTJ3_REG_DATA_CTRL_REG, 0x02, 0}, // 50 Hz output data rate
     {KXTJ3_REG_CTRL_REG1, 0xC0, 0}, // enabled mode, +/-2G range
 };
 
