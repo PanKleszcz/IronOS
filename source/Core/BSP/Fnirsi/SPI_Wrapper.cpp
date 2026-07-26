@@ -34,6 +34,17 @@ static void _spiSendByte(uint8_t byte) {
     ;
 }
 
+// The LCD reset sequence also runs before FreeRTOS starts. Use a calibrated-enough
+// busy wait there, but let the scheduler run during the longer LCD command delays
+// once tasks are active.
+static void lcdDelayMs(uint16_t milliseconds) {
+  if (xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED) {
+    delay_ms(milliseconds);
+    return;
+  }
+  vTaskDelay(pdMS_TO_TICKS(milliseconds));
+}
+
 void FRToSSPI::sendByte(uint8_t byte) {
   LCD_CS_LOW();
   _spiSendByte(byte);
@@ -150,7 +161,7 @@ void FRToSSPI::sendCmdChain(const FRToSSPI::SPI_CMD *commands, size_t length) {
     if (commands[i].type == FRToSSPI::SPI_CMD_PAYLOAD) {
       sendData(commands[i].data, commands[i].len);
     } else if (commands[i].type == FRToSSPI::SPI_CMD_DELAY_MS) {
-      delay_ms(commands[i].len);
+      lcdDelayMs(commands[i].len);
     }
   }
 }
@@ -158,11 +169,11 @@ void FRToSSPI::sendCmdChain(const FRToSSPI::SPI_CMD *commands, size_t length) {
 // TODO: move it elsewhere
 void FRToSSPI::sendLcdReset(void) {
   LCD_RST_HIGH();
-  delay_ms(10);
+  lcdDelayMs(10);
   LCD_RST_LOW();
-  delay_ms(10);
+  lcdDelayMs(10);
   LCD_RST_HIGH();
-  delay_ms(120);
+  lcdDelayMs(120);
 }
 
 bool FRToSSPI::lock() {
