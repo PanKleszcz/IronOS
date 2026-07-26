@@ -6,7 +6,7 @@
 // #include "BootLogo.h"
 // #include "I2C_Wrapper.hpp"
 #include "Pins.h"
-// #include "Settings.h"
+#include "Settings.h"
 #include "Setup.h"
 #include "TipThermoModel.h"
 #include "history.hpp"
@@ -313,8 +313,12 @@ uint16_t getTipInertia() {
 
 void showBootLogo(void) {
   // Blit the colour FNIRSI logo (extracted from stock firmware) straight to the panel,
-  // then hold it until a button is pressed or the user's logo timeout elapses.
+  // then reveal it and hold until a button is pressed or the timeout elapses.
   LCD::drawNativeImage(FNIRSI_LOGO_X, FNIRSI_LOGO_Y, FNIRSI_LOGO_W, FNIRSI_LOGO_H, fnirsiBootLogo);
+  // SPI has drained here, but wait for the panel to scan the new GRAM once before
+  // enabling its backlight; this avoids exposing the previous white scanline.
+  vTaskDelay(TICKS_SECOND / 60);
+  LCD::setBrightness(getSettingValue(SettingsOptions::DisplayBrightness));
   waitForButtonPressOrTimeout(TICKS_SECOND * 2);
 }
 

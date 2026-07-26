@@ -141,9 +141,8 @@ void LCD::initialize() {
   FRToSSPI::init();
   FRToSSPI::sendCmdChain(lcdInitCmds, sizeof(lcdInitCmds) / sizeof(*lcdInitCmds));
 
-  // Erase background
-  setDrawingWindow(0, 0, 160, 80);
-  FRToSSPI::sendByteMutiple(0x00, 2 * 160 * 80);
+  // Keep the backlight off until the first meaningful frame is ready. The boot
+  // logo is a full-screen image, so an intermediate GRAM clear is unnecessary.
 }
 
 void LCD::setFramebuffer(uint8_t *buffer) {
@@ -294,13 +293,15 @@ bool LCD::scrollUp(uint8_t pos) {
   return (loopCounter++ % 3 == 0);
 }
 
-void LCD::setRotation(bool leftHanded) {
+void LCD::setRotation(bool leftHanded, bool refresh) {
   if (leftHanded) {
     FRToSSPI::sendCmdChain(&lcdInitCmdRotL, 1);
   } else {
     FRToSSPI::sendCmdChain(&lcdInitCmdRotR, 1);
   }
-  refresh(true);
+  if (refresh) {
+    LCD::refresh(true);
+  }
 }
 
 void LCD::setBrightness(uint8_t brightness) {
